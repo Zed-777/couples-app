@@ -1,0 +1,2506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Us">
+<meta name="theme-color" content="#E11D48">
+<title>Us — Couples App</title>
+<!-- Deployed with Cloudflare Pages environment variables - Updated -->
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Barlow+Condensed:wght@700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+/* ══ TOKENS ══════════════════════════════════════════════════ */
+:root{
+  --bg:#0F0A0E;--sf:#1A1020;--s2:#231430;--b1:#2D1B40;--b2:#3D2555;
+  --t1:#F5E6F0;--t2:#C9A8C0;--t3:#8B6E85;
+  --his:#6366F1;--his-bg:rgba(99,102,241,.13);
+  --her:#E11D48;--her-bg:rgba(225,29,72,.13);
+  --both:#A855F7;--both-bg:rgba(168,85,247,.12);
+  --gold:#F59E0B;--green:#10B981;--red:#EF4444;
+  --hdr:rgba(15,10,14,.92);
+  --shadow:rgba(0,0,0,.6);--overlay:rgba(0,0,0,.7);
+  --radius:12px;--tr:.2s;
+  --font:'DM Sans','Helvetica Neue',sans-serif;
+  --disp:'Barlow Condensed',sans-serif;
+  --serif:'Playfair Display',serif;
+}
+body.light{
+  --bg:#FFF0F5;--sf:#FFFFFF;--s2:#FFF5F8;--b1:#FECDD3;--b2:#FDA4AF;
+  --t1:#1F0A14;--t2:#6B2B45;--t3:#B06080;
+  --hdr:rgba(255,240,245,.95);
+  --shadow:rgba(0,0,0,.12);--overlay:rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--t1);font-family:var(--font);font-size:14px;min-height:100vh;-webkit-font-smoothing:antialiased;transition:background var(--tr),color var(--tr)}
+button{cursor:pointer;font-family:var(--font);border:none;background:none;touch-action:manipulation;transition:opacity .15s}
+button:active{opacity:.7}
+input,select,textarea{font-family:var(--font);font-size:16px;color:var(--t1);background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:11px 14px;width:100%;outline:none;-webkit-appearance:none;box-sizing:border-box;transition:border-color var(--tr),background var(--tr)}
+input:focus,select:focus,textarea:focus{border-color:var(--her)}
+input::placeholder,textarea::placeholder{color:var(--t3)}
+select option{background:var(--s2);color:var(--t1)}
+textarea{resize:vertical;min-height:80px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes heartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}45%{transform:scale(1.15)}60%{transform:scale(1)}}
+@keyframes fadeup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin1{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ══ PIN AUTHENTICATION MODAL ═════════════════════════════ */
+.pin-overlay{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
+.pin-overlay.hidden{display:none}
+.pin-modal{width:100%;max-width:360px;background:var(--sf);border:1px solid var(--b2);border-radius:20px;padding:40px 28px;text-align:center;box-shadow:0 20px 60px var(--shadow)}
+.pin-heart{font-size:56px;margin-bottom:16px;animation:pulse 2s infinite}
+.pin-title{font-family:var(--serif);font-size:28px;color:var(--her);margin-bottom:4px;font-weight:700}
+.pin-sub{font-size:13px;color:var(--t3);margin-bottom:28px}
+.pin-input-wrap{margin-bottom:20px}
+.pin-input{text-align:center;font-size:20px;letter-spacing:8px;font-weight:700;padding:16px 12px;background:var(--s2);border:2px solid var(--b2);border-radius:12px;color:var(--t1);transition:border-color .2s}
+.pin-input:focus{border-color:var(--her)}
+.pin-submit-btn{width:100%;background:linear-gradient(135deg,var(--her),var(--his));color:#fff;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s;margin-bottom:12px}
+.pin-submit-btn:active{transform:scale(.98)}
+.pin-error{background:rgba(239,68,68,.1);border:1px solid #EF4444;border-radius:8px;color:#EF4444;padding:10px 12px;font-size:13px;margin-bottom:16px;display:none;animation:fadeup .2s ease}
+.pin-error.show{display:block}
+.pin-hint{font-size:12px;color:var(--t3)}
+
+/* ══ SETUP ══════════════════════════════════════════════════ */
+#setup{display:none;min-height:100vh;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
+#setup.active{display:flex}
+.setup-wrap{width:100%;max-width:460px}
+.setup-heart{font-size:48px;text-align:center;margin-bottom:8px;animation:heartbeat 2s infinite}
+.setup-title{font-family:var(--serif);font-size:28px;color:var(--her);text-align:center;margin-bottom:4px}
+.setup-sub{color:var(--t3);font-size:13px;text-align:center;margin-bottom:24px}
+.setup-card{background:var(--sf);border:1px solid var(--b2);border-radius:16px;padding:24px;margin-bottom:12px}
+.setup-section{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+.couple-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.color-row{display:flex;gap:8px;flex-wrap:wrap}
+.color-swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color .15s}
+.color-swatch.sel{border-color:var(--t1)}
+.sql-block{background:var(--bg);border:1px solid var(--b2);border-radius:8px;padding:12px;font-family:monospace;font-size:11px;color:#34D399;white-space:pre;overflow-x:auto;margin:10px 0}
+details summary{color:var(--t2);font-size:13px;cursor:pointer;padding:8px 0;list-style:none}
+details summary::before{content:"▶ "}
+details[open] summary::before{content:"▼ "}
+#setup-err{background:rgba(239,68,68,.1);border:1px solid #EF4444;border-radius:8px;color:#EF4444;padding:10px 12px;font-size:13px;margin-bottom:14px;display:none}
+
+/* ══ BANNER ══════════════════════════════════════════════════ */
+#banner{background:linear-gradient(135deg,var(--his-bg) 0%,rgba(168,85,247,.15) 50%,var(--her-bg) 100%);border-bottom:1px solid var(--b2);padding:14px 16px 12px;position:sticky;top:0;z-index:60;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:background var(--tr)}
+.banner-inner{max-width:720px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.banner-couple{display:flex;align-items:center;gap:10px}
+.banner-name{font-family:var(--serif);font-size:20px;line-height:1}
+.banner-heart{font-size:24px;animation:heartbeat 2.5s infinite;flex-shrink:0}
+.banner-sub{font-size:10px;color:var(--t3);margin-top:2px}
+.banner-actions{display:flex;gap:8px;align-items:center}
+.theme-btn{background:var(--s2);border:1px solid var(--b2);border-radius:20px;padding:5px 10px;color:var(--t2);font-size:14px;cursor:pointer}
+.streak-pill{background:var(--her-bg);border:1px solid rgba(225,29,72,.3);border-radius:99px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--her);display:flex;align-items:center;gap:4px}
+
+/* ══ NAV ══════════════════════════════════════════════════ */
+#nav{position:fixed;bottom:0;left:0;right:0;background:var(--hdr);border-top:1px solid var(--b1);z-index:50;backdrop-filter:blur(12px);padding-bottom:env(safe-area-inset-bottom)}
+.nav-inner{max-width:720px;margin:0 auto;display:flex}
+.nav-btn{flex:1;padding:9px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;color:var(--t3);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:color var(--tr)}
+.nav-btn.active{color:var(--her)}
+.nav-icon{font-size:18px;line-height:1}
+
+/* ══ MAIN ══════════════════════════════════════════════════ */
+#app{display:none}
+#app.active{display:block}
+#view{max-width:720px;margin:0 auto;padding:14px 14px 90px;animation:fadeup .25s ease}
+
+/* ══ COMMON COMPONENTS ══════════════════════════════════════ */
+.view-title{font-family:var(--disp);font-size:24px;font-weight:900;letter-spacing:.04em;color:var(--t1);margin-bottom:2px}
+.view-sub{font-size:12px;color:var(--t3);margin-bottom:14px}
+.card{background:var(--sf);border:1px solid var(--b1);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;transition:background var(--tr)}
+body.light .card{box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.section-lbl{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.12em;text-transform:uppercase;margin:14px 0 8px;padding-left:2px}
+.divider{height:1px;background:var(--b1);margin:10px 0}
+.tab-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:6px 14px;border-radius:99px;border:1px solid var(--b2);background:var(--s2);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tab.active-his{background:var(--his-bg);border-color:var(--his);color:var(--his)}
+.tab.active-her{background:var(--her-bg);border-color:var(--her);color:var(--her)}
+.tab.active-both{background:var(--both-bg);border-color:var(--both);color:var(--both)}
+.tab.active-all{background:rgba(245,158,11,.12);border-color:var(--gold);color:var(--gold)}
+.empty{text-align:center;padding:40px 20px;color:var(--t3)}
+.empty-icon{font-size:36px;margin-bottom:10px}
+.empty-title{font-family:var(--disp);font-size:18px;font-weight:700;color:var(--t1);margin-bottom:4px}
+.add-btn{width:100%;padding:12px;border-radius:var(--radius);border:1.5px dashed var(--b2);background:none;color:var(--t2);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;margin-top:4px}
+.add-btn:hover{border-color:var(--her);color:var(--her)}
+.btn-primary{background:var(--her);border:none;border-radius:10px;color:#fff;padding:13px 24px;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:background .2s}
+.btn-ghost{background:none;border:1.5px solid var(--b2);border-radius:10px;color:var(--t2);padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer}
+.priority-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
+.avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+
+/* ══ TODO ══════════════════════════════════════════════════ */
+.todo-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--sf);border:1px solid var(--b1);border-radius:10px;margin-bottom:6px;transition:opacity .2s}
+.todo-item.done-item{opacity:.45}
+.todo-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;flex-shrink:0;transition:all .2s}
+.todo-text{flex:1;font-size:14px;color:var(--t1)}
+.todo-item.done-item .todo-text{text-decoration:line-through;color:var(--t3)}
+.todo-meta{font-size:11px;color:var(--t3);display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:2px}
+.todo-del{color:var(--t3);font-size:16px;padding:2px 6px;flex-shrink:0}
+
+/* ══ SHOPPING ══════════════════════════════════════════════ */
+.shop-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--sf);border:1px solid var(--b1);border-radius:10px;margin-bottom:5px;cursor:pointer;transition:opacity .15s}
+.shop-item.checked{opacity:.4}
+.shop-item.checked .shop-name{text-decoration:line-through}
+.shop-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all .15s}
+.shop-check.on{background:var(--green);border-color:var(--green);color:#fff}
+.shop-name{flex:1;font-size:13px;color:var(--t1)}
+.shop-qty{font-size:12px;color:var(--t3);flex-shrink:0}
+
+/* ══ GOALS ══════════════════════════════════════════════════ */
+.goal-card{background:var(--sf);border:1px solid var(--b1);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px}
+.goal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.goal-text{font-size:14px;font-weight:600;color:var(--t1);flex:1;padding-right:10px}
+.goal-meta{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.goal-type-pill{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:99px}
+.goal-progress{margin-top:6px}
+.goal-bar{height:5px;background:var(--b2);border-radius:3px;overflow:hidden;margin-bottom:4px}
+.goal-bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
+.goal-steps{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.step-pill{font-size:11px;padding:3px 10px;border-radius:99px;border:1px solid var(--b2);background:var(--s2);color:var(--t2);cursor:pointer}
+.step-pill.done{background:var(--green);border-color:var(--green);color:#fff}
+
+/* ══ CALENDAR ══════════════════════════════════════════════ */
+.cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cal-nav-btn{background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:6px 12px;color:var(--t2);font-size:14px;cursor:pointer}
+.cal-dow-row{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px}
+.cal-dow{text-align:center;font-size:10px;font-weight:700;color:var(--t3);padding:3px 0;text-transform:uppercase}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-cell{min-height:44px;border-radius:8px;padding:3px;position:relative;cursor:pointer;border:1px solid transparent;transition:border-color .15s}
+.cal-cell:hover{border-color:var(--b2)}
+.cal-cell.today-cell{border-color:var(--her)!important;background:var(--her-bg)}
+.cal-cell.other-month{opacity:.35}
+.cal-num{font-size:12px;font-weight:600;color:var(--t1);text-align:center;margin-bottom:2px}
+.event-dot{height:4px;border-radius:2px;margin-bottom:2px}
+.event-list{margin-top:14px}
+.event-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--sf);border:1px solid var(--b1);border-radius:10px;margin-bottom:6px}
+.event-bar{width:3px;border-radius:2px;align-self:stretch;flex-shrink:0;min-height:20px}
+.event-info{flex:1;min-width:0}
+.event-title{font-size:14px;font-weight:600;color:var(--t1)}
+.event-meta{font-size:11px;color:var(--t3);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap}
+.event-del{color:var(--t3);font-size:15px;padding:2px 6px}
+
+/* ══ NOTES ══════════════════════════════════════════════════ */
+.note-card{background:var(--sf);border:1px solid var(--b1);border-radius:var(--radius);padding:14px;margin-bottom:8px;cursor:pointer;position:relative;overflow:hidden;transition:border-color .15s}
+.note-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%}
+.note-card:hover{border-color:var(--b2)}
+.note-title{font-size:14px;font-weight:700;color:var(--t1);margin-bottom:4px}
+.note-preview{font-size:12px;color:var(--t3);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.note-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.note-date{font-size:11px;color:var(--t3)}
+.pin-icon{font-size:14px}
+.pinned-banner{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:6px;font-weight:600}
+
+/* ══ MEMORIES ══════════════════════════════════════════════ */
+.memory-card{background:var(--sf);border:1px solid var(--b1);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px}
+.memory-emoji{font-size:28px;flex-shrink:0;line-height:1}
+.memory-info{flex:1;min-width:0}
+.memory-title{font-size:14px;font-weight:700;color:var(--t1);margin-bottom:2px}
+.memory-date{font-size:12px;color:var(--t3)}
+.memory-note{font-size:12px;color:var(--t2);margin-top:4px}
+.anniv-countdown{background:linear-gradient(135deg,var(--her-bg),var(--his-bg));border:1px solid var(--b2);border-radius:var(--radius);padding:16px;margin-bottom:14px;text-align:center}
+.anniv-days{font-family:var(--disp);font-size:44px;font-weight:900;color:var(--her);line-height:1}
+.anniv-label{font-size:12px;color:var(--t3);margin-top:4px}
+
+/* ══ MOOD ══════════════════════════════════════════════════ */
+.mood-section{margin-bottom:14px}
+.mood-name{font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em}
+.mood-row{display:flex;gap:8px}
+.mood-btn{flex:1;padding:10px 4px;border-radius:10px;border:1.5px solid var(--b2);background:var(--s2);font-size:22px;cursor:pointer;text-align:center;transition:all .15s}
+.mood-btn.sel{border-width:2.5px}
+.mood-label{font-size:9px;font-weight:700;text-align:center;margin-top:3px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em}
+
+/* ══ LOVE NOTES ══════════════════════════════════════════════ */
+.love-note-card{border-radius:var(--radius);padding:14px;margin-bottom:8px;position:relative;overflow:hidden}
+.love-note-from{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.love-note-msg{font-family:var(--serif);font-size:15px;color:var(--t1);line-height:1.5;margin-bottom:8px}
+.love-note-date{font-size:11px;color:var(--t3)}
+.unread-badge{display:inline-block;background:var(--her);color:#fff;border-radius:99px;font-size:9px;font-weight:700;padding:1px 7px;margin-left:6px}
+
+/* ══ BUCKET LIST ══════════════════════════════════════════════ */
+.bucket-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--sf);border:1px solid var(--b1);border-radius:10px;margin-bottom:6px}
+.bucket-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--her);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;flex-shrink:0;transition:all .2s}
+.bucket-check.done{background:var(--her);color:#fff}
+.bucket-text{flex:1;font-size:14px;color:var(--t1)}
+.bucket-item.done-bucket .bucket-text{text-decoration:line-through;color:var(--t3)}
+
+/* ══ MONEY ══════════════════════════════════════════════════ */
+.expense-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--sf);border:1px solid var(--b1);border-radius:10px;margin-bottom:6px}
+.expense-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.expense-info{flex:1;min-width:0}
+.expense-desc{font-size:14px;font-weight:600;color:var(--t1)}
+.expense-meta{font-size:11px;color:var(--t3);margin-top:2px}
+.expense-amount{font-size:14px;font-weight:700;flex-shrink:0}
+.balance-card{border-radius:var(--radius);padding:14px 16px;margin-bottom:12px;text-align:center}
+.balance-num{font-family:var(--disp);font-size:36px;font-weight:900;line-height:1}
+.balance-label{font-size:12px;color:var(--t3);margin-top:4px}
+
+/* ══ DATE JAR ══════════════════════════════════════════════ */
+.jar-spin-wrap{text-align:center;padding:20px}
+.jar-result{background:linear-gradient(135deg,var(--her-bg),var(--his-bg));border:1px solid var(--b2);border-radius:var(--radius);padding:24px;margin:14px 0;min-height:80px;display:flex;align-items:center;justify-content:center}
+.jar-idea{font-family:var(--serif);font-size:20px;color:var(--t1);text-align:center;line-height:1.4}
+.spin-btn{background:linear-gradient(135deg,var(--her),var(--his));border:none;border-radius:99px;color:#fff;padding:14px 32px;font-size:16px;font-weight:700;cursor:pointer;font-family:var(--font);box-shadow:0 4px 20px rgba(225,29,72,.3);transition:transform .15s,box-shadow .15s}
+.spin-btn:active{transform:scale(.97)}
+.date-idea-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--sf);border:1px solid var(--b1);border-radius:10px;margin-bottom:6px}
+.idea-text{flex:1;font-size:13px;color:var(--t1)}
+.idea-done{text-decoration:line-through;color:var(--t3)}
+.star-btn{color:var(--gold);font-size:16px;padding:2px 4px}
+
+/* ══ OVERLAY / SHEET ══════════════════════════════════════════════ */
+.overlay{position:fixed;inset:0;background:var(--overlay);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.sheet{background:var(--sf);border-radius:16px 16px 0 0;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;padding:20px 18px 44px;box-shadow:0 -20px 60px var(--shadow)}
+.sheet-handle{width:36px;height:4px;background:var(--b2);border-radius:2px;margin:0 auto 16px}
+.sheet-title{font-family:var(--disp);font-size:20px;font-weight:900;color:var(--t1);margin-bottom:16px}
+.sheet-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.sheet-close{color:var(--t3);font-size:22px;padding:4px;background:none;border:none;cursor:pointer}
+.sheet-footer{display:flex;gap:10px;margin-top:12px}
+
+/* ══ TOAST ══════════════════════════════════════════════════ */
+#toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(10px);border-radius:99px;padding:10px 20px;font-size:13px;font-weight:700;z-index:9999;opacity:0;transition:opacity .2s,transform .2s;white-space:nowrap;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{background:#34D399;color:#0a0a0a}
+#toast.er{background:#EF4444;color:#fff}
+#toast.info{background:var(--sf);color:var(--t1);border:1px solid var(--b2);box-shadow:0 4px 16px var(--shadow)}
+</style>
+<script src="/api/env"></script>
+</head>
+<body>
+
+<!-- ══ PIN AUTHENTICATION MODAL ══════════════════════════════ -->
+<div id="pin-modal-overlay" class="pin-overlay">
+  <div class="pin-modal">
+    <div class="pin-heart">🔐</div>
+    <div class="pin-title">Enter PIN</div>
+    <div class="pin-sub">Your shared couples app</div>
+    
+    <div id="pin-error" class="pin-error"></div>
+    
+    <div class="pin-input-wrap">
+      <input type="password" id="pin-input" class="pin-input" placeholder="Enter PIN" maxlength="6" inputmode="numeric" autocomplete="off">
+    </div>
+    
+    <button class="pin-submit-btn" onclick="submitPIN()">Unlock</button>
+    
+    <div class="pin-hint">Enter the PIN to access the app</div>
+  </div>
+</div>
+
+<!-- ══ SETUP ══════════════════════════════════════════════════ -->
+<div id="setup">
+<div class="setup-wrap">
+  <div class="setup-heart">💑</div>
+  <div class="setup-title">Welcome, You Two</div>
+  <div class="setup-sub">Set up your shared space — takes 2 minutes</div>
+
+  <div id="setup-err"></div>
+
+  <details style="margin-bottom:14px">
+    <summary>⚙️ First time? Create your database table</summary>
+    <div style="padding:8px 0">
+      <p style="color:var(--t3);font-size:12px;margin-bottom:6px">Go to Supabase → your project → SQL Editor → run:</p>
+      <div class="sql-block">create table couple_data (
+  id text primary key,
+  data jsonb not null,
+  created_at timestamptz default now()
+);
+alter table couple_data enable row level security;
+create policy "allow all" on couple_data
+  for all using (true) with check (true);</div>
+    </div>
+  </details>
+
+  <div class="setup-card">
+    <div class="setup-section">Your Names</div>
+    <div class="couple-row">
+      <div class="field">
+        <label>His Name</label>
+        <input type="text" id="s-his" placeholder="e.g. James" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Her Name</label>
+        <input type="text" id="s-her" placeholder="e.g. Sophie" autocomplete="off">
+      </div>
+    </div>
+    <div class="field">
+      <label>Anniversary Date</label>
+      <input type="date" id="s-anniv">
+    </div>
+  </div>
+
+  <div class="setup-card">
+    <div class="setup-section">Colours</div>
+    <div class="field">
+      <label id="his-color-lbl">His Colour</label>
+      <div class="color-row" id="his-colors">
+        <div class="color-swatch sel" data-color="#6366F1" style="background:#6366F1" onclick="pickColor('his',this,'#6366F1')"></div>
+        <div class="color-swatch" data-color="#3B82F6" style="background:#3B82F6" onclick="pickColor('his',this,'#3B82F6')"></div>
+        <div class="color-swatch" data-color="#0EA5E9" style="background:#0EA5E9" onclick="pickColor('his',this,'#0EA5E9')"></div>
+        <div class="color-swatch" data-color="#10B981" style="background:#10B981" onclick="pickColor('his',this,'#10B981')"></div>
+        <div class="color-swatch" data-color="#8B5CF6" style="background:#8B5CF6" onclick="pickColor('his',this,'#8B5CF6')"></div>
+        <div class="color-swatch" data-color="#F59E0B" style="background:#F59E0B" onclick="pickColor('his',this,'#F59E0B')"></div>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label id="her-color-lbl">Her Colour</label>
+      <div class="color-row" id="her-colors">
+        <div class="color-swatch sel" data-color="#E11D48" style="background:#E11D48" onclick="pickColor('her',this,'#E11D48')"></div>
+        <div class="color-swatch" data-color="#EC4899" style="background:#EC4899" onclick="pickColor('her',this,'#EC4899')"></div>
+        <div class="color-swatch" data-color="#A855F7" style="background:#A855F7" onclick="pickColor('her',this,'#A855F7')"></div>
+        <div class="color-swatch" data-color="#F97316" style="background:#F97316" onclick="pickColor('her',this,'#F97316')"></div>
+        <div class="color-swatch" data-color="#EF4444" style="background:#EF4444" onclick="pickColor('her',this,'#EF4444')"></div>
+        <div class="color-swatch" data-color="#D946EF" style="background:#D946EF" onclick="pickColor('her',this,'#D946EF')"></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-primary" onclick="submitSetup()" id="setup-btn" style="margin-top:4px">Begin Our Journey 💑</button>
+</div>
+</div>
+
+<!-- ══ APP ══════════════════════════════════════════════════ -->
+<div id="app">
+  <div id="banner">
+    <div class="banner-inner">
+      <div class="banner-couple">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="banner-name" id="bn-his" style="color:var(--his)"></span>
+            <span class="banner-heart">💗</span>
+            <span class="banner-name" id="bn-her" style="color:var(--her)"></span>
+          </div>
+          <div class="banner-sub" id="bn-sub"></div>
+        </div>
+      </div>
+      <div class="banner-actions">
+        <div class="streak-pill" id="streak-pill">🔥 <span id="streak-num">0</span></div>
+        <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">☀️</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="view"></div>
+
+  <div id="nav">
+    <div class="nav-inner">
+      <button class="nav-btn active" id="nb-home"     onclick="go('home')"><span class="nav-icon">🏠</span>Home</button>
+      <button class="nav-btn"        id="nb-todos"    onclick="go('todos')"><span class="nav-icon">✅</span>Todos</button>
+      <button class="nav-btn"        id="nb-shopping" onclick="go('shopping')"><span class="nav-icon">🛒</span>Shop</button>
+      <button class="nav-btn"        id="nb-goals"    onclick="go('goals')"><span class="nav-icon">🎯</span>Goals</button>
+      <button class="nav-btn"        id="nb-calendar" onclick="go('calendar')"><span class="nav-icon">📅</span>Cal</button>
+      <button class="nav-btn"        id="nb-more"     onclick="go('more')"><span class="nav-icon">✨</span>More</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODALS ══════════════════════════════════════════════════ -->
+<!-- Todo modal -->
+<div class="overlay" id="todo-modal" onclick="if(event.target===this)closeModal('todo-modal')">
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title" id="todo-modal-title">Add Todo</div><button class="sheet-close" onclick="closeModal('todo-modal')">✕</button></div>
+  <div class="field"><label>Task</label><input type="text" id="tm-text" placeholder="What needs to be done?" autocomplete="off"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="field"><label>For</label><select id="tm-who"><option value="his">Him</option><option value="her">Her</option></select></div>
+    <div class="field"><label>Priority</label><select id="tm-pri"><option value="low">Low</option><option value="med" selected>Medium</option><option value="high">High</option></select></div>
+    <div class="field"><label>Due Date</label><input type="date" id="tm-date"></div>
+    <div class="field"><label>Category</label><input type="text" id="tm-cat" placeholder="e.g. Home, Work" autocomplete="off"></div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="closeModal('todo-modal')" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="saveTodo()" id="save-todo-btn" style="flex:2">Save</button>
+  </div>
+</div></div>
+
+<!-- Shopping modal -->
+<div class="overlay" id="shop-modal" onclick="if(event.target===this)closeModal('shop-modal')">
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title">Add Item</div><button class="sheet-close" onclick="closeModal('shop-modal')">✕</button></div>
+  <div class="field"><label>Item</label><input type="text" id="sm-item" placeholder="e.g. Olive Oil" autocomplete="off"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="field"><label>Quantity</label><input type="text" id="sm-qty" placeholder="e.g. 2" inputmode="decimal" autocomplete="off"></div>
+    <div class="field"><label>Unit</label><input type="text" id="sm-unit" placeholder="e.g. bottles" autocomplete="off"></div>
+    <div class="field" style="grid-column:1/-1"><label>Category</label>
+      <select id="sm-cat">
+        <option value="produce">🥦 Produce</option>
+        <option value="meat">🥩 Meat & Fish</option>
+        <option value="dairy">🥛 Dairy</option>
+        <option value="bakery">🍞 Bakery</option>
+        <option value="pantry">🫙 Pantry</option>
+        <option value="frozen">🧊 Frozen</option>
+        <option value="drinks">� Drinks</option>
+        <option value="snacks">🍿 Snacks</option>
+        <option value="household">🧹 Household & Cleaning</option>
+        <option value="personal">🧴 Personal Care</option>
+        <option value="pet">🐾 Pet Supplies</option>
+        <option value="flowers">🌸 Flowers</option>
+        <option value="other">📦 Other</option>
+      </select>
+    </div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="closeModal('shop-modal')" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="saveShopItem()" id="save-shop-btn" style="flex:2">Add</button>
+  </div>
+</div></div>
+
+<!-- Goal modal -->
+<div class="overlay" id="goal-modal" onclick="if(event.target===this)closeModal('goal-modal')">
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title">Add Goal</div><button class="sheet-close" onclick="closeModal('goal-modal')">✕</button></div>
+  <div class="field"><label>Goal</label><input type="text" id="gm-text" placeholder="e.g. Go to gym 3x this week" autocomplete="off"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="field"><label>For</label><select id="gm-who"><option value="his">Him</option><option value="her">Her</option></select></div>
+    <div class="field"><label>Timeframe</label><select id="gm-type"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div>
+    <div class="field"><label>Target (steps)</label><input type="number" id="gm-target" placeholder="e.g. 3" min="1" max="31" inputmode="numeric"></div>
+    <div class="field"><label>Steps label</label><input type="text" id="gm-step-label" placeholder="e.g. sessions" autocomplete="off"></div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="closeModal('goal-modal')" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="saveGoal()" id="save-goal-btn" style="flex:2">Save</button>
+  </div>
+</div></div>
+
+<!-- Event modal -->
+<div class="overlay" id="event-modal" onclick="if(event.target===this)closeModal('event-modal')">
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title">Add Event</div><button class="sheet-close" onclick="closeModal('event-modal')">✕</button></div>
+  <div class="field"><label>Title</label><input type="text" id="em-title" placeholder="e.g. Dinner reservation" autocomplete="off"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="field"><label>Date</label><input type="date" id="em-date"></div>
+    <div class="field"><label>Time</label><input type="time" id="em-time"></div>
+    <div class="field"><label>For</label><select id="em-who"><option value="both">Both</option><option value="his">Him</option><option value="her">Her</option></select></div>
+    <div class="field"><label>Type</label>
+      <select id="em-type">
+        <option value="date">💑 Date</option>
+        <option value="appt">📋 Appointment</option>
+        <option value="birthday">🎂 Birthday</option>
+        <option value="anniv">💍 Anniversary</option>
+        <option value="trip">✈️ Trip</option>
+        <option value="dinner">🍽️ Dinner</option>
+        <option value="movie">🎬 Movie/Show</option>
+        <option value="concert">🎵 Concert</option>
+        <option value="workout">💪 Workout</option>
+        <option value="meeting">👔 Meeting</option>
+        <option value="other">📌 Other</option>
+      </select>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="field"><label>Color</label>
+      <div class="color-row" id="em-colors" style="gap:6px;flex-wrap:wrap">
+        <div class="color-swatch sel" data-color="#E11D48" style="background:#E11D48;width:28px;height:28px" onclick="document.getElementById('em-color').value='#E11D48';updateColorSwatch()"></div>
+        <div class="color-swatch" data-color="#6366F1" style="background:#6366F1;width:28px;height:28px" onclick="document.getElementById('em-color').value='#6366F1';updateColorSwatch()"></div>
+        <div class="color-swatch" data-color="#A855F7" style="background:#A855F7;width:28px;height:28px" onclick="document.getElementById('em-color').value='#A855F7';updateColorSwatch()"></div>
+        <div class="color-swatch" data-color="#F59E0B" style="background:#F59E0B;width:28px;height:28px" onclick="document.getElementById('em-color').value='#F59E0B';updateColorSwatch()"></div>
+        <div class="color-swatch" data-color="#10B981" style="background:#10B981;width:28px;height:28px" onclick="document.getElementById('em-color').value='#10B981';updateColorSwatch()"></div>
+        <div class="color-swatch" data-color="#0EA5E9" style="background:#0EA5E9;width:28px;height:28px" onclick="document.getElementById('em-color').value='#0EA5E9';updateColorSwatch()"></div>
+      </div>
+      <input type="hidden" id="em-color" value="#E11D48">
+    </div>
+    <div class="field"><label>Repeat</label>
+      <select id="em-repeat">
+        <option value="never">Never</option>
+        <option value="yearly">Yearly</option>
+        <option value="weekly">Weekly</option>
+      </select>
+    </div>
+  </div>
+  <div class="field" id="repeat-until-field" style="display:none"><label>Repeat Until</label><input type="date" id="em-repeat-until"></div>
+  <div class="field"><label>Note</label><textarea id="em-note" placeholder="Any details…" rows="2"></textarea></div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="closeModal('event-modal')" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="saveEvent()" style="flex:2">Save</button>
+  </div>
+</div></div>
+
+<!-- Note modal -->
+<div class="overlay" id="note-modal" onclick="if(event.target===this)closeModal('note-modal')">
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title" id="note-modal-title">New Note</div><button class="sheet-close" onclick="closeModal('note-modal')">✕</button></div>
+  <div class="field"><label>Title</label><input type="text" id="nm-title" placeholder="Give it a title…" autocomplete="off"></div>
+  <div class="field"><label>Note</label><textarea id="nm-body" placeholder="Write anything…" rows="5"></textarea></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="field"><label>Type</label>
+      <select id="nm-type">
+        <option value="personal">💭 Personal</option>
+        <option value="idea">💡 Idea</option>
+        <option value="todo">✅ Todo</option>
+        <option value="memory">🌟 Memory</option>
+        <option value="reminder">⏰ Reminder</option>
+        <option value="important">🔴 Important</option>
+      </select>
+    </div>
+    <div class="field"><label>Visibility</label><select id="nm-who"><option value="both">Shared</option><option value="his">His only</option><option value="her">Her only</option></select></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="field"><label>Pin</label><select id="nm-pin"><option value="0">No</option><option value="1">Yes — pin to top</option></select></div>
+    <div class="field" style="display:flex;align-items:flex-end;gap:8px">
+      <input type="checkbox" id="nm-read" style="width:18px;height:18px;cursor:pointer">
+      <label for="nm-read" style="margin:0;flex:1;text-transform:capitalize">Mark as read</label>
+    </div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="closeModal('note-modal')" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="saveNote()" style="flex:2">Save</button>
+  </div>
+</div></div>
+
+<!-- Memory modal -->
+<div class="overlay" id="mem-modal" onclick="if(event.target===this)closeModal('mem-modal')">
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title">Add Memory</div><button class="sheet-close" onclick="closeModal('mem-modal')">✕</button></div>
+  <div class="field"><label>Title</label><input type="text" id="mm-title" placeholder="e.g. First trip to Paris" autocomplete="off"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="field"><label>Date</label><input type="date" id="mm-date"></div>
+    <div class="field"><label>Emoji</label><input type="text" id="mm-emoji" placeholder="e.g. ✈️" autocomplete="off" maxlength="4"></div>
+  </div>
+  <div class="field"><label>Note</label><textarea id="mm-note" placeholder="A few words about this memory…" rows="3"></textarea></div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="closeModal('mem-modal')" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="saveMemory()" style="flex:2">Save</button>
+  </div>
+</div></div>
+
+<!-- Love note modal -->
+<div class="overlay" id="ln-modal" onclick="if(event.target===this)closeModal('ln-modal')">
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title">💌 Write a Love Note</div><button class="sheet-close" onclick="closeModal('ln-modal')">✕</button></div>
+  <div class="field"><label>From</label><select id="lm-from"><option value="his">Him</option><option value="her">Her</option></select></div>
+  <div class="field"><label>Message</label><textarea id="lm-msg" placeholder="Write something sweet…" rows="4"></textarea></div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="closeModal('ln-modal')" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="saveLoveNote()" style="flex:2">Send 💌</button>
+  </div>
+</div></div>
+
+<!-- Bucket modal -->
+<div class="overlay" id="bucket-modal" onclick="if(event.target===this)closeModal('bucket-modal')">
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title">🌍 Add to Bucket List</div><button class="sheet-close" onclick="closeModal('bucket-modal')">✕</button></div>
+  <div class="field"><label>Dream / Goal</label><input type="text" id="bm-text" placeholder="e.g. See the Northern Lights" autocomplete="off"></div>
+  <div class="field"><label>Priority</label><select id="bm-pri"><option value="low">Someday 🌟</option><option value="med">This Year 🎯</option><option value="high">Top Priority 🔥</option></select></div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="closeModal('bucket-modal')" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="saveBucket()" style="flex:2">Add</button>
+  </div>
+</div></div>
+
+<!-- Expense modal -->
+<div class="overlay" id="exp-modal" onclick="if(event.target===this)closeModal('exp-modal')">
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title">💰 Add Expense</div><button class="sheet-close" onclick="closeModal('exp-modal')">✕</button></div>
+  <div class="field"><label>Description</label><input type="text" id="exm-desc" placeholder="e.g. Dinner at Mario's" autocomplete="off"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="field"><label>Amount ($)</label><input type="number" id="exm-amount" placeholder="0.00" step="0.01" inputmode="decimal"></div>
+    <div class="field"><label>Paid by</label><select id="exm-who"><option value="his">Him</option><option value="her">Her</option></select></div>
+    <div class="field"><label>Split</label><select id="exm-split"><option value="equal">50/50 Equal</option><option value="his">He pays all</option><option value="her">She pays all</option></select></div>
+    <div class="field"><label>Category</label>
+      <select id="exm-cat">
+        <option value="food">🍽 Food & Dining</option>
+        <option value="home">🏠 Home</option>
+        <option value="fun">🎉 Entertainment</option>
+        <option value="travel">✈️ Travel</option>
+        <option value="health">💊 Health</option>
+        <option value="other">📦 Other</option>
+      </select>
+    </div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="closeModal('exp-modal')" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="saveExpense()" style="flex:2">Add</button>
+  </div>
+</div></div>
+
+<!-- Date idea modal -->
+<div class="overlay" id="idea-modal" onclick="if(event.target===this)closeModal('idea-modal')">
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title">🎉 Add Date Idea</div><button class="sheet-close" onclick="closeModal('idea-modal')">✕</button></div>
+  <div class="field"><label>Idea</label><input type="text" id="im-idea" placeholder="e.g. Cooking class together" autocomplete="off"></div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="closeModal('idea-modal')" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="saveIdea()" style="flex:2">Add</button>
+  </div>
+</div></div>
+
+<!-- Read Love Note modal -->
+<div class="overlay" id="read-ln-modal" onclick="if(event.target===this)closeModal('read-ln-modal')">
+<div class="sheet" style="max-height:70vh">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title">💌 Love Note</div><button class="sheet-close" onclick="closeModal('read-ln-modal')">✕</button></div>
+  <div id="read-ln-content" style="padding:14px;background:var(--s2);border-radius:12px;margin-bottom:16px">
+    <div id="read-ln-from" style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px"></div>
+    <div id="read-ln-msg" style="font-family:var(--serif);font-size:16px;color:var(--t1);line-height:1.6;margin-bottom:12px"></div>
+    <div id="read-ln-date" style="font-size:11px;color:var(--t3)"></div>
+  </div>
+  <div id="read-ln-status" style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:10px 12px;font-size:12px;color:#10B981;text-align:center;margin-bottom:16px;font-weight:600;display:none"></div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="markLoveNoteRead('his')" style="flex:1" id="read-by-him">Read by Him</button>
+    <button class="btn-ghost" onclick="markLoveNoteRead('her')" style="flex:1" id="read-by-her">Read by Her</button>
+    <button class="btn-primary" onclick="closeModal('read-ln-modal')" style="flex:1">Done</button>
+  </div>
+</div></div>
+
+<!-- Settlement modal -->
+<div class="overlay" id="settlement-modal" onclick="if(event.target===this)closeModal('settlement-modal')">
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title">💰 Settle Up</div><button class="sheet-close" onclick="closeModal('settlement-modal')">✕</button></div>
+  <div id="settlement-content" style="padding:14px;border-radius:10px;background:var(--s2);margin-bottom:16px;text-align:center">
+    <div style="font-size:14px;color:var(--t3);margin-bottom:8px" id="settlement-text"></div>
+    <div style="font-family:var(--disp);font-size:32px;font-weight:900" id="settlement-amount"></div>
+  </div>
+  <div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:12px;font-size:12px;color:#10B981;margin-bottom:16px;text-align:center;font-weight:600" id="settlement-msg"></div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="closeModal('settlement-modal')" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="confirmSettlement()" style="flex:2">Mark Settled</button>
+  </div>
+</div></div>
+
+<!-- Debt modal -->
+<div class="overlay" id="debt-modal" onclick="if(event.target===this)closeModal('debt-modal')">
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title">💳 Add Debt</div><button class="sheet-close" onclick="closeModal('debt-modal')">✕</button></div>
+  <div class="field"><label>Description</label><input type="text" id="dm-desc" placeholder="e.g. Loan for laptop" autocomplete="off"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="field"><label>Amount ($)</label><input type="number" id="dm-amount" placeholder="0.00" step="0.01" inputmode="decimal"></div>
+    <div class="field"><label>Owed By</label><select id="dm-who"><option value="his">Him</option><option value="her">Her</option><option value="both">Both</option></select></div>
+  </div>
+  <div class="field"><label>Notes</label><textarea id="dm-note" placeholder="Any details..." rows="2"></textarea></div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="closeModal('debt-modal')" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="saveDebt()" style="flex:2">Add</button>
+  </div>
+</div></div>
+
+<!-- Payment Update modal -->
+<div class="overlay" id="payment-modal" onclick="if(event.target===this)closeModal('payment-modal')">
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title">💰 Add Payment</div><button class="sheet-close" onclick="closeModal('payment-modal')">✕</button></div>
+  <div style="background:var(--s2);padding:12px;border-radius:8px;margin-bottom:14px">
+    <div style="font-size:12px;color:var(--t3);margin-bottom:4px">Debt</div>
+    <div id="pm-desc" style="font-weight:600;font-size:14px;color:var(--t1)"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+    <div style="background:var(--s2);padding:12px;border-radius:8px">
+      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;font-weight:600;margin-bottom:4px">Debt Amount</div>
+      <div id="pm-total" style="font-size:16px;font-weight:800;color:var(--her)"></div>
+    </div>
+    <div style="background:var(--s2);padding:12px;border-radius:8px">
+      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;font-weight:600;margin-bottom:4px">Already Paid</div>
+      <div id="pm-already-paid" style="font-size:16px;font-weight:800;color:var(--green)"></div>
+    </div>
+    <div style="background:var(--s2);padding:12px;border-radius:8px">
+      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;font-weight:600;margin-bottom:4px">Remaining</div>
+      <div id="pm-remaining" style="font-size:16px;font-weight:800;color:var(--his)"></div>
+    </div>
+  </div>
+  <div class="field"><label>New Payment Amount ($)</label><input type="number" id="pm-payment" placeholder="0.00" step="0.01" inputmode="decimal"></div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="closeModal('payment-modal')" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="updateDebtPayment()" style="flex:2">Add Payment</button>
+  </div>
+</div></div>
+  </div>
+</div></div>
+
+<!-- Bill modal -->
+<div class="overlay" id="bill-modal" onclick="if(event.target===this)closeModal('bill-modal')">
+<div class="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header"><div class="sheet-title">📋 Add Bill</div><button class="sheet-close" onclick="closeModal('bill-modal')">✕</button></div>
+  <div class="field"><label>Bill Name</label><input type="text" id="bm-name" placeholder="e.g. Internet Bill" autocomplete="off"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="field"><label>Amount ($)</label><input type="number" id="bm-amount" placeholder="0.00" step="0.01" inputmode="decimal"></div>
+    <div class="field"><label>Due Date</label><input type="date" id="bm-date"></div>
+    <div class="field"><label>Repeat</label>
+      <select id="bm-repeat">
+        <option value="monthly">Monthly</option>
+        <option value="yearly">Yearly</option>
+        <option value="weekly">Weekly</option>
+        <option value="once">Once</option>
+      </select>
+    </div>
+    <div class="field"><label>Paid By</label><select id="bm-who"><option value="both">Both</option><option value="his">Him</option><option value="her">Her</option></select></div>
+  </div>
+  <div class="sheet-footer">
+    <button class="btn-ghost" onclick="closeModal('bill-modal')" style="flex:1">Cancel</button>
+    <button class="btn-primary" onclick="saveBill()" style="flex:2">Add</button>
+  </div>
+</div></div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════
+// SUPABASE MODULE
+// ═══════════════════════════════════════════════════════════
+const SB_URL=window.__ENV?.SUPABASE_URL||window.SUPABASE_URL||'';
+const SB_KEY=window.__ENV?.SUPABASE_KEY||window.SUPABASE_KEY||'';
+if(!SB_URL||!SB_KEY){
+  throw new Error('Missing Supabase config. Provide window.__ENV via config.js (local) or deployment env injection.');
+}
+const CTABLE=SB_URL+'/rest/v1/couple_data';
+const CH={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+const DB={
+  async get(id){const r=await fetch(`${CTABLE}?id=eq.${encodeURIComponent(id)}&select=data`,{headers:CH});if(!r.ok)throw r.status;const rows=await r.json();return rows.length?rows[0].data:null;},
+  async set(id,data){const r=await fetch(CTABLE,{method:'POST',headers:{...CH,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id,data})});if(!r.ok)throw r.status;},
+  async getAll(prefix){const r=await fetch(`${CTABLE}?id=like.${encodeURIComponent(prefix+'*')}&select=id,data&order=created_at.desc`,{headers:CH});if(!r.ok)throw r.status;return r.json();}
+};
+
+// ═══════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════
+const CONST={
+  WHO:{HIS:'his',HER:'her',BOTH:'both'},
+  VIEWS:{SETUP:'setup',HOME:'home',TODOS:'todos',SHOP:'shop',GOALS:'goals',CALENDAR:'calendar',NOTES:'notes',MEMORIES:'memories',LOVE:'love',BUCKET:'bucket',JAR:'jar',EXPENSES:'expenses'},
+  MODALS:{TODO:'todo-modal',SHOP:'shop-modal',GOAL:'goal-modal',EVENT:'event-modal',NOTE:'note-modal',MEMORY:'mem-modal',LOVE:'ln-modal',BUCKET:'bucket-modal',EXPENSE:'exp-modal',JAR:'idea-modal'},
+  MAIN_ELEMENTS:{VIEW:'view',HEADER:'hdr',BANNER:'banner'},
+  FILTERS:{ALL:'both',HIS:'his',HER:'her'}
+};
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+const S={
+  profile:null,view:'home',
+  todos_his:[],todos_her:[],
+  shopping:[],
+  goals_his:[],goals_her:[],
+  events:[],
+  notes:[],
+  memories:[],
+  moods:{},
+  love_notes:[],
+  bucket:[],
+  expenses:[],
+  debts:[],
+  bills:[],
+  date_ideas:[],
+  setupPicks:{his:'#6366F1',her:'#E11D48'},
+  calMonth:{y:new Date().getFullYear(),m:new Date().getMonth()},
+  selectedCalDay:null,
+  todoFilter:'both',
+  goalFilter:'both',
+  noteFilter:'both',
+  editNoteId:null,
+  editDebtId:null,
+  viewingLoveNoteId:null,
+  moreSub:'mood'
+};
+
+// ═══════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function todayStr(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function fmtDate(s){if(!s)return'';const d=new Date(s+'T00:00');return d.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});}
+function fmtDateShort(s){if(!s)return'';const d=new Date(s+'T00:00');return d.toLocaleDateString('en-AU',{day:'numeric',month:'short'});}
+function pv(v){const n=parseFloat(String(v||0).replace(/[^0-9.]/g,''));return isNaN(n)?0:n;}
+function fm(n){if(!n&&n!==0)return'$0.00';return'$'+Number(n).toFixed(2);}
+function daysUntil(dateStr){if(!dateStr)return null;const t=new Date(dateStr+'T00:00'),n=new Date();n.setHours(0,0,0,0);return Math.round((t-n)/86400000);}
+function nextAnniv(dateStr){if(!dateStr)return null;const d=new Date(dateStr+'T00:00'),now=new Date();now.setHours(0,0,0,0);let next=new Date(now.getFullYear(),d.getMonth(),d.getDate());if(next<now)next.setFullYear(now.getFullYear()+1);return Math.round((next-now)/86400000);}
+let _tt=null;
+function flash(msg,type='ok'){if(_tt)clearTimeout(_tt);const el=document.getElementById('toast');el.textContent=(type==='er'?'⚠ ':type==='info'?'ℹ ':'✓ ')+msg;el.className='show '+type;_tt=setTimeout(()=>{el.className='';},type==='er'?4000:2400);}
+
+// Debounce helper for operations
+let _moodDebounce={};
+function moodDebounceKey(dt){return'mood_'+dt;}
+function isMoodPending(dt){return _moodDebounce[dt]||false;}
+
+// ═══════════════════════════════════════════════════════════
+// PIN AUTHENTICATION (COUPLES_APP_PIN)
+// ═══════════════════════════════════════════════════════════
+function checkPINAuth(){
+  // Check if already authenticated in this session
+  if(sessionStorage.getItem('COUPLES_APP_AUTH')==='true'){
+    hidePINModal();
+    return true;
+  }
+  // Show PIN modal
+  showPINModal();
+  return false;
+}
+
+function showPINModal(){
+  const overlay=document.getElementById('pin-modal-overlay');
+  overlay.classList.remove('hidden');
+  document.getElementById('pin-input').focus();
+  // Prevent app from loading
+  document.getElementById('app').classList.remove('active');
+}
+
+function hidePINModal(){
+  const overlay=document.getElementById('pin-modal-overlay');
+  overlay.classList.add('hidden');
+}
+
+function submitPIN(){
+  const input=document.getElementById('pin-input');
+  const enteredPIN=input.value.trim();
+  const correctPIN=window.__ENV?.COUPLES_APP_PIN || '';
+  
+  if(!correctPIN){
+    showPINError('PIN not configured. Contact admin.');
+    return;
+  }
+  
+  if(enteredPIN===correctPIN){
+    // Correct PIN - set session auth and show app
+    sessionStorage.setItem('COUPLES_APP_AUTH','true');
+    showPINSuccess('✓ Access granted');
+    setTimeout(()=>{
+      hidePINModal();
+      init(); // Load the app
+    },400);
+  }else{
+    // Wrong PIN - show error with delay
+    showPINError('❌ Incorrect PIN. Try again.');
+    input.value='';
+    input.focus();
+    // Add slight delay to prevent rapid guessing
+    setTimeout(()=>{},800);
+  }
+}
+
+function showPINError(msg){
+  const errEl=document.getElementById('pin-error');
+  errEl.textContent=msg;
+  errEl.classList.add('show');
+  setTimeout(()=>{errEl.classList.remove('show');},3000);
+}
+
+function showPINSuccess(msg){
+  const errEl=document.getElementById('pin-error');
+  errEl.textContent=msg;
+  errEl.style.background='rgba(16,185,129,.1)';
+  errEl.style.borderColor='#10B981';
+  errEl.style.color='#10B981';
+  errEl.classList.add('show');
+  setTimeout(()=>{
+    errEl.classList.remove('show');
+    errEl.style.background='';
+    errEl.style.borderColor='';
+    errEl.style.color='';
+  },1500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════
+function applyTheme(mode){document.body.classList.toggle('light',mode==='light');document.getElementById('theme-btn').textContent=mode==='light'?'🌙':'☀️';localStorage.setItem('us-theme',mode);}
+function toggleTheme(){applyTheme(document.body.classList.contains('light')?'dark':'light');}
+applyTheme(localStorage.getItem('us-theme')||'dark');
+
+// ═══════════════════════════════════════════════════════════
+// COLOURS
+// ═══════════════════════════════════════════════════════════
+function applyColors(p){
+  const r=document.documentElement.style;
+  r.setProperty('--his',p.hisColor||'#6366F1');
+  r.setProperty('--his-bg',hexAlpha(p.hisColor||'#6366F1',.13));
+  r.setProperty('--her',p.herColor||'#E11D48');
+  r.setProperty('--her-bg',hexAlpha(p.herColor||'#E11D48',.13));
+}
+function hexAlpha(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`rgba(${r},${g},${b},${a})`;}
+
+// ═══════════════════════════════════════════════════════════
+// SETUP
+// ═══════════════════════════════════════════════════════════
+function pickColor(who,el,color){S.setupPicks[who]=color;document.getElementById(who+'-colors').querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');}
+
+async function submitSetup(){
+  const his=document.getElementById('s-his').value.trim();
+  const her=document.getElementById('s-her').value.trim();
+  const anniv=document.getElementById('s-anniv').value;
+  const err=document.getElementById('setup-err');
+  if(!his||!her){err.textContent='Please enter both names.';err.style.display='block';return;}
+  err.style.display='none';
+  const btn=document.getElementById('setup-btn');btn.textContent='Setting up…';btn.disabled=true;
+  const profile={hisName:his,herName:her,anniversary:anniv,hisColor:S.setupPicks.his,herColor:S.setupPicks.her,createdAt:new Date().toISOString()};
+  try{await DB.set('profile',profile);S.profile=profile;startApp();}
+  catch(e){btn.textContent='Begin Our Journey 💑';btn.disabled=false;err.textContent='Could not save. Make sure couple_data table is created in Supabase and you have internet.';err.style.display='block';}
+}
+
+// ═══════════════════════════════════════════════════════════
+// APP START
+// ═══════════════════════════════════════════════════════════
+function startApp(){
+  document.getElementById('setup').classList.remove('active');
+  document.getElementById('app').classList.add('active');
+  const p=S.profile;
+  applyColors(p);
+  document.getElementById('bn-his').textContent=p.hisName;
+  document.getElementById('bn-her').textContent=p.herName;
+  updateBannerSub();
+  go('home');
+}
+function updateBannerSub(){
+  const p=S.profile;
+  if(!p)return;
+  const days=p.anniversary?nextAnniv(p.anniversary):null;
+  let sub='';
+  if(days!==null)sub=days===0?'Happy Anniversary! 🎉 ':days===1?'Anniversary tomorrow! 💍':days+' days until anniversary 💍';
+  document.getElementById('bn-sub').textContent=sub;
+  // Streak
+  let streak=0,d=new Date();
+  while(streak<365){const ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;const m=S.moods[ds];if(m&&(m.his||m.her)){streak++;d.setDate(d.getDate()-1);}else break;}
+  document.getElementById('streak-num').textContent=streak;
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function go(view){
+  S.view=view;
+  ['home','todos','shopping','goals','calendar','more'].forEach(v=>{
+    const btn=document.getElementById('nb-'+v);
+    if(btn)btn.classList.toggle('active',v===view);
+  });
+  renderView();
+}
+function renderView(){
+  const vw=document.getElementById('view');
+  vw.style.animation='none';vw.offsetHeight;vw.style.animation='';
+  switch(S.view){
+    case 'home':     renderHome();     break;
+    case 'todos':    renderTodos();    break;
+    case 'shopping': renderShopping(); break;
+    case 'goals':    renderGoals();    break;
+    case 'calendar': renderCalendar(); break;
+    case 'more':     renderMore();     break;
+  }
+}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function clearForm(modalId){
+  const modal=document.getElementById(modalId);
+  if(modal){
+    modal.querySelectorAll('input,textarea,select').forEach(el=>{
+      if(el.type==='checkbox'||el.type==='radio') el.checked=false;
+      else el.value='';
+    });
+  }
+}
+
+function setLoading(btnId, isLoading){
+  const btn=document.getElementById(btnId);
+  if(!btn) return;
+  if(isLoading){
+    btn.disabled=true;
+    btn._originalText=btn.textContent;
+    btn.innerHTML='<span style="display:inline-block;animation:spin1 1s linear infinite;margin-right:6px">⟳</span>'+btn.textContent;
+  } else {
+    btn.disabled=false;
+    btn.textContent=btn._originalText||btn.textContent;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// HOME VIEW
+// ═══════════════════════════════════════════════════════════
+function renderHome(){
+  const p=S.profile;
+  const today=todayStr();
+  const todayMood=S.moods[today]||{};
+  const pendingTodos=[...S.todos_his,...S.todos_her].filter(t=>!t.done&&t.dueDate===today).length;
+  const pendingAll=[...S.todos_his,...S.todos_her].filter(t=>!t.done).length;
+  const todayEvents=S.events.filter(e=>e.date===today);
+  const unreadNotes=S.love_notes.filter(n=>!n.read).length;
+  const days=p.anniversary?nextAnniv(p.anniversary):null;
+
+  const moodEmojis=['😔','😕','😐','😊','🥰'];
+
+  let html=`
+  <div class="view-title">Good ${greeting()}, Lovebirds 💗</div>
+  <div class="view-sub">${fmtDate(today)}</div>`;
+
+  // Anniversary countdown
+  if(days!==null){
+    html+=`<div class="anniv-countdown" style="margin-bottom:14px">
+      <div class="anniv-days">${days===0?'🎉':days}</div>
+      <div class="anniv-label">${days===0?'Happy Anniversary! 🎊':days===1?'Anniversary tomorrow! 💍':`${days} days until your anniversary 💍`}</div>
+    </div>`;
+  }
+
+  // Today at a glance
+  html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+    <div class="card" style="text-align:center;cursor:pointer" onclick="go('todos')">
+      <div style="font-size:28px;margin-bottom:4px">✅</div>
+      <div style="font-family:var(--disp);font-size:28px;font-weight:900;color:var(--t1)">${pendingAll}</div>
+      <div style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em">Open Todos</div>
+    </div>
+    <div class="card" style="text-align:center;cursor:pointer" onclick="go('calendar')">
+      <div style="font-size:28px;margin-bottom:4px">📅</div>
+      <div style="font-family:var(--disp);font-size:28px;font-weight:900;color:var(--t1)">${todayEvents.length}</div>
+      <div style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em">Today's Events</div>
+    </div>
+    <div class="card" style="text-align:center;cursor:pointer" onclick="go('more');S.moreSub='lovenotes'">
+      <div style="font-size:28px;margin-bottom:4px">💌</div>
+      <div style="font-family:var(--disp);font-size:28px;font-weight:900;color:${unreadNotes?'var(--her)':'var(--t1)'}">${unreadNotes}</div>
+      <div style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em">Love Notes</div>
+    </div>
+    <div class="card" style="text-align:center;cursor:pointer" onclick="go('shopping')">
+      <div style="font-size:28px;margin-bottom:4px">🛒</div>
+      <div style="font-family:var(--disp);font-size:28px;font-weight:900;color:var(--t1)">${S.shopping.filter(i=>!i.checked).length}</div>
+      <div style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em">To Buy</div>
+    </div>
+  </div>`;
+
+  // Today's mood
+  html+=`<div class="card">
+    <div style="font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Today's Mood</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--his);margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em">${esc(p.hisName)}</div>
+        <div style="display:flex;gap:4px">
+          ${moodEmojis.map((e,i)=>`<button onclick="logMood('his',${i+1},'${today}')" style="flex:1;padding:7px 2px;border-radius:8px;border:2px solid ${todayMood.his===i+1?'var(--his)':'var(--b2)'};background:${todayMood.his===i+1?'var(--his-bg)':'var(--s2)'};font-size:16px;cursor:pointer">${e}</button>`).join('')}
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--her);margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em">${esc(p.herName)}</div>
+        <div style="display:flex;gap:4px">
+          ${moodEmojis.map((e,i)=>`<button onclick="logMood('her',${i+1},'${today}')" style="flex:1;padding:7px 2px;border-radius:8px;border:2px solid ${todayMood.her===i+1?'var(--her)':'var(--b2)'};background:${todayMood.her===i+1?'var(--her-bg)':'var(--s2)'};font-size:16px;cursor:pointer">${e}</button>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  // Today's events
+  if(todayEvents.length){
+    html+=`<div class="section-lbl">📅 Today's Events</div>`;
+    todayEvents.forEach(e=>{
+      const col=e.color||'var(--both)';
+      html+=`<div class="event-item"><div class="event-bar" style="background:${col}"></div>
+        <div class="event-info"><div class="event-title">${esc(e.title)}</div>
+        <div class="event-meta">${e.time?`⏰ ${e.time}`:''}${e.note?` · ${esc(e.note)}`:''}</div></div></div>`;
+    });
+  }
+
+  // Quick actions
+  html+=`<div class="section-lbl">Quick Actions</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <button class="add-btn" style="margin:0" onclick="openModal(CONST.MODALS.TODO);document.getElementById('tm-who').value='his'">+ ${esc(p.hisName)}'s Todo</button>
+    <button class="add-btn" style="margin:0" onclick="openModal(CONST.MODALS.TODO);document.getElementById('tm-who').value='her'">+ ${esc(p.herName)}'s Todo</button>
+    <button class="add-btn" style="margin:0" onclick="openModal(CONST.MODALS.LOVE)">💌 Love Note</button>
+    <button class="add-btn" style="margin:0" onclick="openModal(CONST.MODALS.EVENT)">📅 Add Event</button>
+    <button class="add-btn" style="margin:0" onclick="go('more');S.moreSub='notes';renderView()">📝 Notes</button>
+    <button class="add-btn" style="margin:0" onclick="go('more');S.moreSub='money';renderView()">💰 Money</button>
+  </div>`;
+
+  document.getElementById('view').innerHTML=html;
+}
+
+function greeting(){const h=new Date().getHours();return h<12?'Morning':h<17?'Afternoon':'Evening';}
+
+async function logMood(who,val,dt){
+  // Prevent race condition: block if already saving this date
+  if(isMoodPending(dt))return;
+  if(!S.moods[dt])S.moods[dt]={};
+  S.moods[dt][who]=val;
+  _moodDebounce[dt]=true;
+  try{
+    await DB.set('mood_'+dt,S.moods[dt]);
+    updateBannerSub();
+    renderView();
+    flash('Mood logged','info');
+  }catch(e){
+    // Revert on error
+    delete S.moods[dt][who];
+    flash('Failed to save mood','er');
+    console.error('Mood save error:',e);
+  }finally{
+    _moodDebounce[dt]=false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// TODOS VIEW
+// ═══════════════════════════════════════════════════════════
+function renderTodos(){
+  const p=S.profile;
+  const priColors={high:'#EF4444',med:'#F59E0B',low:'var(--green)'};
+  const priLabels={high:'High',med:'Medium',low:'Low'};
+
+  let html=`<div class="view-title">✅ Todos</div>
+  <div class="tab-row">
+    <button class="tab ${S.todoFilter==='both'?'active-both':''}" onclick="S.todoFilter='both';renderView()">Both</button>
+    <button class="tab ${S.todoFilter==='his'?'active-his':''}" onclick="S.todoFilter='his';renderView()">${esc(p.hisName)}</button>
+    <button class="tab ${S.todoFilter==='her'?'active-her':''}" onclick="S.todoFilter='her';renderView()">${esc(p.herName)}</button>
+  </div>`;
+
+  const renderList=(todos,who,color)=>{
+    if(S.todoFilter!=='both'&&S.todoFilter!==who)return'';
+    const open=todos.filter(t=>!t.done);
+    const done=todos.filter(t=>t.done);
+    let out=`<div class="section-lbl" style="color:${color}">${esc(who==='his'?p.hisName:p.herName)}'s Todos <span style="color:var(--t3)">(${open.length} open)</span></div>`;
+    if(!todos.length){
+      out+=`<div class="empty"><div class="empty-icon">${who==='his'?'💪':'🌸'}</div><div class="empty-title">All clear!</div><div style="font-size:13px;color:var(--t3)">No todos yet</div></div>`;
+    }
+    [...open,...done].forEach(t=>{
+      const dc=t.dueDate&&t.dueDate<todayStr()&&!t.done?'var(--red)':t.dueDate?'var(--t3)':'';
+      out+=`<div class="todo-item ${t.done?'done-item':''}">
+        <div class="todo-check ${t.done?'':''}\" style="${t.done?`background:${color};border-color:${color};color:#fff`:''}" onclick="toggleTodo('${who}','${t.id}')">${t.done?'✓':''}</div>
+        <div style="flex:1;min-width:0">
+          <div class="todo-text">${esc(t.text)}</div>
+          <div class="todo-meta">
+            ${t.priority?`<span class="priority-dot" style="background:${priColors[t.priority]}"></span>${priLabels[t.priority]}`:''}
+            ${t.dueDate?`<span style="color:${dc}">📅 ${fmtDateShort(t.dueDate)}</span>`:''}
+            ${t.category?`<span>🏷 ${esc(t.category)}</span>`:''}
+          </div>
+        </div>
+        <button class="todo-del" onclick="deleteTodo('${who}','${t.id}')">🗑</button>
+      </div>`;
+    });
+    out+=`<button class="add-btn" onclick="openModal('todo-modal');document.getElementById('tm-who').value='${who}'">+ Add Todo</button>`;
+    return out;
+  };
+
+  html+=renderList(S.todos_his,'his','var(--his)');
+  html+=renderList(S.todos_her,'her','var(--her)');
+  document.getElementById('view').innerHTML=html;
+}
+
+async function saveTodo(){
+  const text=document.getElementById('tm-text').value.trim();
+  if(!text){flash('Enter a task','er');return;}
+  const who=document.getElementById('tm-who').value;
+  const todo={id:uid(),text,priority:document.getElementById('tm-pri').value,dueDate:document.getElementById('tm-date').value,category:document.getElementById('tm-cat').value.trim(),done:false,createdAt:new Date().toISOString()};
+  if(who==='his')S.todos_his.unshift(todo);else S.todos_her.unshift(todo);
+  closeModal('todo-modal');
+  clearForm('todo-modal');
+  try{
+    await DB.set('todos_'+who,who==='his'?S.todos_his:S.todos_her);
+    renderView();flash('Todo added');
+  }catch(e){
+    flash('Failed to save todo','er');console.error('Save error:',e);
+    if(who==='his')S.todos_his.pop();else S.todos_her.pop();
+  }
+}
+async function toggleTodo(who,id){
+  const list=who==='his'?S.todos_his:S.todos_her;
+  const t=list.find(x=>x.id===id);if(!t)return;
+  const wasDone=t.done;
+  t.done=!t.done;t.completedAt=t.done?new Date().toISOString():null;
+  try{
+    await DB.set('todos_'+who,list);renderView();
+    flash(t.done?'Done! ✓':'Marked incomplete','info');
+  }catch(e){
+    t.done=wasDone;t.completedAt=wasDone?new Date().toISOString():null;
+    flash('Failed to update','er');console.error('Toggle error:',e);
+  }
+}
+async function deleteTodo(who,id){
+  const original=who==='his'?[...S.todos_his]:[...S.todos_her];
+  if(who==='his')S.todos_his=S.todos_his.filter(t=>t.id!==id);
+  else S.todos_her=S.todos_her.filter(t=>t.id!==id);
+  try{
+    await DB.set('todos_'+who,who==='his'?S.todos_his:S.todos_her);
+    renderView();flash('Deleted','info');
+  }catch(e){
+    if(who==='his')S.todos_his=original;else S.todos_her=original;
+    flash('Failed to delete','er');console.error('Delete error:',e);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SHOPPING VIEW
+// ═══════════════════════════════════════════════════════════
+const SHOP_CATS={produce:'🥦 Produce',meat:'🥩 Meat & Fish',dairy:'🥛 Dairy',bakery:'🍞 Bakery',pantry:'🫙 Pantry',frozen:'🧊 Frozen',drinks:'� Drinks',snacks:'🍿 Snacks',household:'🧹 Household & Cleaning',personal:'🧴 Personal Care',pet:'🐾 Pet Supplies',flowers:'🌸 Flowers',other:'📦 Other'};
+
+function renderShopping(){
+  const unchecked=S.shopping.filter(i=>!i.checked).length;
+  let html=`<div class="view-title">🛒 Shopping List</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div class="view-sub" style="margin:0">${unchecked} items remaining</div>
+    <button onclick="clearShopChecked()" style="font-size:12px;color:var(--t3);background:none;border:none;cursor:pointer;padding:4px">Clear checked</button>
+  </div>`;
+
+  const cats=Object.keys(SHOP_CATS);
+  let hasItems=false;
+  cats.forEach(cat=>{
+    const items=S.shopping.filter(i=>i.cat===cat);
+    if(!items.length)return;
+    hasItems=true;
+    html+=`<div style="margin-bottom:14px"><div class="section-lbl">${SHOP_CATS[cat]}</div>`;
+    items.forEach(item=>{
+      const qty=item.qty?(item.qty+(item.unit?' '+item.unit:'')):'';
+      html+=`<div class="shop-item ${item.checked?'checked':''}" onclick="toggleShop('${item.id}')">
+        <div class="shop-check ${item.checked?'on':''}">✓</div>
+        <div class="shop-name">${esc(item.item)}</div>
+        <div class="shop-qty">${esc(qty)}</div>
+        <button onclick="event.stopPropagation();deleteShopItem('${item.id}')" style="color:var(--t3);font-size:15px;padding:2px 6px;background:none;border:none;cursor:pointer">🗑</button>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  if(!hasItems)html+=`<div class="empty"><div class="empty-icon">🛒</div><div class="empty-title">List is empty</div><div style="font-size:13px;color:var(--t3)">Add items below</div></div>`;
+  html+=`<button class="add-btn" onclick="openModal('shop-modal')">+ Add Item</button>`;
+  document.getElementById('view').innerHTML=html;
+}
+
+async function saveShopItem(){
+  const item=document.getElementById('sm-item').value.trim();
+  if(!item){flash('Enter an item','er');return;}
+  const si={id:uid(),item,qty:document.getElementById('sm-qty').value.trim(),unit:document.getElementById('sm-unit').value.trim(),cat:document.getElementById('sm-cat').value,checked:false};
+  S.shopping.push(si);
+  closeModal('shop-modal');
+  clearForm('shop-modal');
+  try{
+    await DB.set('shopping',S.shopping);renderView();flash('Item added');
+  }catch(e){
+    S.shopping.pop();flash('Failed to save','er');console.error('Save error:',e);
+  }
+}
+async function toggleShop(id){
+  const i=S.shopping.find(x=>x.id===id);if(!i)return;
+  const wasChecked=i.checked;
+  i.checked=!i.checked;
+  try{
+    await DB.set('shopping',S.shopping);renderView();
+  }catch(e){
+    i.checked=wasChecked;
+    flash('Failed to update','er');console.error('Toggle error:',e);
+  }
+}
+async function deleteShopItem(id){
+  const original=[...S.shopping];
+  S.shopping=S.shopping.filter(i=>i.id!==id);
+  try{
+    await DB.set('shopping',S.shopping);renderView();flash('Removed','info');
+  }catch(e){
+    S.shopping=original;
+    flash('Failed to delete','er');console.error('Delete error:',e);
+  }
+}
+async function clearShopChecked(){
+  const original=[...S.shopping];
+  S.shopping=S.shopping.filter(i=>!i.checked);
+  try{
+    await DB.set('shopping',S.shopping);renderView();flash('Cleared checked items','info');
+  }catch(e){
+    S.shopping=original;
+    flash('Failed to clear','er');console.error('Clear error:',e);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// GOALS VIEW
+// ═══════════════════════════════════════════════════════════
+function renderGoals(){
+  const p=S.profile;
+  let html=`<div class="view-title">🎯 Goals</div>
+  <div class="tab-row">
+    <button class="tab ${S.goalFilter==='both'?'active-both':''}" onclick="S.goalFilter='both';renderView()">Both</button>
+    <button class="tab ${S.goalFilter==='his'?'active-his':''}" onclick="S.goalFilter='his';renderView()">${esc(p.hisName)}</button>
+    <button class="tab ${S.goalFilter==='her'?'active-her':''}" onclick="S.goalFilter='her';renderView()">${esc(p.herName)}</button>
+  </div>`;
+
+  const typeColors={daily:'#10B981',weekly:'#6366F1',monthly:'#F59E0B'};
+  const renderGoalList=(goals,who,color)=>{
+    if(S.goalFilter!=='both'&&S.goalFilter!==who)return'';
+    let out=`<div class="section-lbl" style="color:${color}">${esc(who==='his'?p.hisName:p.herName)}'s Goals</div>`;
+    if(!goals.length){out+=`<div class="empty"><div class="empty-icon">${who==='his'?'💪':'🌸'}</div><div class="empty-title">No goals yet</div></div>`;return out+'<button class="add-btn" onclick="openModal(\'goal-modal\');document.getElementById(\'gm-who\').value=\''+who+'\'"\'">+ Add Goal</button>';}
+    goals.forEach(g=>{
+      const pct=Math.min(100,Math.round((g.progress||0)/(g.target||1)*100));
+      const tc=typeColors[g.type]||'var(--ac)';
+      const steps=Array.from({length:g.target||1},(_,i)=>i);
+      out+=`<div class="goal-card">
+        <div class="goal-header">
+          <div class="goal-text">${esc(g.text)}</div>
+          <div class="goal-meta">
+            <span class="goal-type-pill" style="background:${hexAlpha(tc,.15)};color:${tc};border:1px solid ${hexAlpha(tc,.3)}">${g.type}</span>
+            <button onclick="deleteGoal('${who}','${g.id}')" style="color:var(--t3);font-size:15px;background:none;border:none;cursor:pointer;padding:2px 4px">🗑</button>
+          </div>
+        </div>
+        <div class="goal-bar"><div class="goal-bar-fill" style="width:${pct}%;background:${tc}"></div></div>
+        <div style="font-size:11px;color:var(--t3);text-align:right;margin-bottom:6px">${g.progress||0} / ${g.target||1} ${esc(g.stepLabel||'steps')} · ${pct}%</div>
+        <div class="goal-steps">
+          ${steps.slice(0,12).map(i=>`<button class="step-pill ${i<(g.progress||0)?'done':''}" onclick="stepGoal('${who}','${g.id}',${i+1})">${i+1}</button>`).join('')}${steps.length>12?`<span style="color:var(--t3);font-size:10px;margin-left:8px;display:inline-block">+${steps.length-12}</span>`:''}
+        </div>
+      </div>`;
+    });
+    out+=`<button class="add-btn" onclick="openModal('goal-modal');document.getElementById('gm-who').value='${who}'">+ Add Goal</button>`;
+    return out;
+  };
+  html+=renderGoalList(S.goals_his,'his','var(--his)');
+  html+=renderGoalList(S.goals_her,'her','var(--her)');
+  document.getElementById('view').innerHTML=html;
+}
+
+async function saveGoal(){
+  const text=document.getElementById('gm-text').value.trim();
+  if(!text){flash('Enter a goal','er');return;}
+  const who=document.getElementById('gm-who').value;
+  const g={id:uid(),text,type:document.getElementById('gm-type').value,target:parseInt(document.getElementById('gm-target').value)||3,stepLabel:document.getElementById('gm-step-label').value.trim()||'steps',progress:0};
+  if(who==='his')S.goals_his.push(g);else S.goals_her.push(g);
+  closeModal('goal-modal');
+  clearForm('goal-modal');
+  try{
+    await DB.set('goals_'+who,who==='his'?S.goals_his:S.goals_her);renderView();flash('Goal added');
+  }catch(e){
+    if(who==='his')S.goals_his.pop();else S.goals_her.pop();
+    flash('Failed to save','er');console.error('Save error:',e);
+  }
+}
+async function stepGoal(who,id,val){
+  const list=who==='his'?S.goals_his:S.goals_her;
+  const g=list.find(x=>x.id===id);if(!g)return;
+  const oldProgress=g.progress;
+  g.progress=g.progress===val?val-1:val;
+  try{
+    if(g.progress>=g.target)flash('Goal complete! 🎉');
+    await DB.set('goals_'+who,list);renderView();
+  }catch(e){
+    g.progress=oldProgress;
+    flash('Failed to update','er');console.error('Step error:',e);
+  }
+}
+async function deleteGoal(who,id){
+  const original=who==='his'?[...S.goals_his]:[...S.goals_her];
+  if(who==='his')S.goals_his=S.goals_his.filter(g=>g.id!==id);
+  else S.goals_her=S.goals_her.filter(g=>g.id!==id);
+  try{
+    await DB.set('goals_'+who,who==='his'?S.goals_his:S.goals_her);renderView();flash('Deleted','info');
+  }catch(e){
+    if(who==='his')S.goals_his=original;else S.goals_her=original;
+    flash('Failed to delete','er');console.error('Delete error:',e);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// CALENDAR VIEW
+// ═══════════════════════════════════════════════════════════
+function renderCalendar(){
+  const {y,m}=S.calMonth;
+  // Bounds: limit to ±10 years from today
+  const now=new Date();
+  const minY=now.getFullYear()-10,maxY=now.getFullYear()+10;
+  if(y<minY||y>maxY)return;  // Prevent extreme dates
+  const today=todayStr();
+  const firstDay=new Date(y,m,1);
+  const startDow=(firstDay.getDay()+6)%7;
+  const totalDays=new Date(y,m+1,0).getDate();
+  const monthName=firstDay.toLocaleDateString('en-AU',{month:'long',year:'numeric'});
+  const prevM=m===0?{y:Math.max(y-1,minY),m:11}:{y,m:m-1};
+  const nextM=m===11?{y:Math.min(y+1,maxY),m:0}:{y,m:m+1};
+
+  let html=`<div class="view-title">📅 Calendar</div>
+  <div class="cal-nav">
+    <button class="cal-nav-btn" onclick="S.calMonth={y:${prevM.y},m:${prevM.m}};S.selectedCalDay=null;renderView()">‹</button>
+    <div style="font-family:var(--disp);font-size:18px;font-weight:800;color:var(--t1)">${monthName}</div>
+    <button class="cal-nav-btn" onclick="S.calMonth={y:${nextM.y},m:${nextM.m}};S.selectedCalDay=null;renderView()">›</button>
+  </div>
+  <div class="cal-dow-row">
+    ${['M','T','W','T','F','S','S'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}
+  </div>
+  <div class="cal-grid">`;
+
+  for(let i=0;i<startDow;i++)html+=`<div></div>`;
+  for(let d=1;d<=totalDays;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayEvents=S.events.filter(e=>e.date===ds);
+    const isToday=ds===today;
+    const isSelected=S.selectedCalDay===ds;
+    html+=`<div class="cal-cell ${isToday?'today-cell':''} ${isSelected?'selected-cell':''}" style="${isSelected?'border:2px solid var(--her);background:var(--her-bg)':''}" onclick="S.selectedCalDay='${ds}';renderView()">
+      <div class="cal-num" style="color:${isToday?'var(--her)':isSelected?'var(--her)':'var(--t1)'}">${d}</div>
+      ${dayEvents.slice(0,3).map(e=>{
+        const c=e.color||'var(--both)';
+        return`<div class="event-dot" style="background:${c}"></div>`;
+      }).join('')}
+    </div>`;
+  }
+  html+=`</div>`;
+
+  // Show selected day's events OR all month events
+  if(S.selectedCalDay){
+    const selectedEvents=S.events.filter(e=>e.date===S.selectedCalDay);
+    const selDate=new Date(S.selectedCalDay+'T00:00');
+    const selLabel=selDate.toLocaleDateString('en-AU',{weekday:'long',month:'short',day:'numeric'});
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;margin-bottom:10px">
+      <div class="view-sub" style="margin:0">📅 ${selLabel}</div>
+      <button style="background:none;border:none;color:var(--her);cursor:pointer;font-size:16px;padding:4px 8px" onclick="S.selectedCalDay=null;renderView()">‹ Back</button>
+    </div>`;
+    if(!selectedEvents.length){
+      html+=`<div class="empty" style="padding:20px"><div class="empty-icon">📭</div><div class="empty-title">No events</div></div>`;
+    }else{
+      selectedEvents.forEach(e=>{
+        const col=e.color||'var(--both)';
+        html+=`<div class="event-item">
+          <div class="event-bar" style="background:${col}"></div>
+          <div class="event-info">
+            <div class="event-title">${esc(e.title)}</div>
+            <div class="event-meta">
+              ${e.time?`⏰ ${e.time}`:''}${e.note?` · ${esc(e.note)}`:''}<br>
+              <span style="font-size:10px;color:var(--t3)">${e.type} · ${e.person==='both'?'Both':e.person==='his'?'His':'Her'}</span>
+            </div>
+          </div>
+          <button class="event-del" onclick="deleteEvent('${e.id}')">🗑</button>
+        </div>`;
+      });
+    }
+  }else{
+    const monthEvents=S.events.filter(e=>e.date.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)).sort((a,b)=>a.date.localeCompare(b.date));
+    if(monthEvents.length){
+      html+=`<div class="section-lbl">This Month's Events</div>`;
+      monthEvents.forEach(e=>{
+        const col=e.color||'var(--both)';
+        html+=`<div class="event-item">
+          <div class="event-bar" style="background:${col}"></div>
+          <div class="event-info">
+            <div class="event-title">${esc(e.title)}</div>
+            <div class="event-meta">
+              <span>📅 ${fmtDateShort(e.date)}${e.time?' · ⏰ '+e.time:''}</span>
+              ${e.note?`<span>${esc(e.note)}</span>`:''}
+            </div>
+          </div>
+          <button class="event-del" onclick="deleteEvent('${e.id}')">🗑</button>
+        </div>`;
+      });
+    }
+  }
+
+  html+=`<button class="add-btn" onclick="openModal('event-modal');document.getElementById('em-date').value='${S.selectedCalDay||today}'">+ Add Event</button>`;
+  document.getElementById('view').innerHTML=html;
+}
+
+async function saveEvent(){
+  const title=document.getElementById('em-title').value.trim();
+  if(!title){flash('Enter event title','er');return;}
+  const repeatType=document.getElementById('em-repeat').value;
+  const repeatUntil=document.getElementById('em-repeat-until').value;
+  const e={id:uid(),title,date:document.getElementById('em-date').value,time:document.getElementById('em-time').value,person:document.getElementById('em-who').value,type:document.getElementById('em-type').value,color:document.getElementById('em-color').value||'#E11D48',note:document.getElementById('em-note').value.trim()};
+  const toAdd=generateRecurringEvents(e,repeatType,repeatUntil);
+  S.events.push(...toAdd);S.events.sort((a,b)=>a.date.localeCompare(b.date));
+  closeModal('event-modal');
+  clearForm('event-modal');
+  document.getElementById('em-repeat').value='never';
+  document.getElementById('em-color').value='#E11D48';
+  document.getElementById('repeat-until-field').style.display='none';
+  try{
+    await DB.set('events',S.events);renderView();flash(toAdd.length>1?toAdd.length+' events saved':'Event saved');
+  }catch(err){
+    S.events=S.events.filter(x=>!toAdd.find(t=>t.id===x.id));
+    flash('Failed to save','er');console.error('Save error:',err);
+  }
+}
+async function deleteEvent(id){
+  const original=[...S.events];
+  S.events=S.events.filter(e=>e.id!==id);
+  try{
+    await DB.set('events',S.events);renderView();flash('Removed','info');
+  }catch(e){
+    S.events=original;
+    flash('Failed to delete','er');console.error('Delete error:',e);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// MORE VIEW (Notes, Memories, Mood, Love Notes, Bucket, Money, Date Jar)
+// ═══════════════════════════════════════════════════════════
+function renderMore(){
+  const subs=['mood','notes','memories','lovenotes','bucket','money','datejar','settings'];
+  const subLabels={mood:'💭 Mood',notes:'📝 Notes',memories:'🌟 Memories',lovenotes:'💌 Love Notes',bucket:'🌍 Bucket',money:'💰 Money',datejar:'🎉 Date Jar',settings:'⚙️ Settings'};
+  let html=`<div class="view-title">✨ More</div>
+  <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none;margin-bottom:14px">
+    ${subs.map(s=>`<button class="tab ${S.moreSub===s?'active-her':''}" onclick="S.moreSub='${s}';renderView()" style="flex-shrink:0">${subLabels[s]}</button>`).join('')}
+  </div>`;
+
+  switch(S.moreSub){
+    case 'mood':       html+=renderMoodSub();     break;
+    case 'notes':      html+=renderNotesSub();    break;
+    case 'memories':   html+=renderMemoriesSub(); break;
+    case 'lovenotes':  html+=renderLoveNotes();   break;
+    case 'bucket':     html+=renderBucket();      break;
+    case 'money':      html+=renderMoney();       break;
+    case 'datejar':    html+=renderDateJar();     break;
+    case 'settings':   html+=renderSettings();    break;
+  }
+  document.getElementById('view').innerHTML=html;
+}
+
+// MOOD SUB
+function renderMoodSub(){
+  const p=S.profile;
+  const moodEmojis=['😔','😕','😐','😊','🥰'];
+  const moodLabels=['Sad','Meh','Okay','Good','Loved'];
+  const last7=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;});
+  let html=`<div class="section-lbl">Today's Mood</div>`;
+  ['his','her'].forEach(who=>{
+    const color=who==='his'?'var(--his)':'var(--her)';
+    const name=who==='his'?p.hisName:p.herName;
+    const today=todayStr();const tm=S.moods[today]||{};
+    html+=`<div class="card" style="margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">${esc(name)}</div>
+      <div style="display:flex;gap:6px">
+        ${moodEmojis.map((e,i)=>`<div style="flex:1;text-align:center">
+          <button onclick="logMood('${who}',${i+1},'${today}')" style="width:100%;padding:8px 4px;border-radius:10px;border:2px solid ${tm[who]===i+1?color:'var(--b2)'};background:${tm[who]===i+1?hexAlpha(who==='his'?S.profile.hisColor||'#6366F1':S.profile.herColor||'#E11D48',.15):'var(--s2)'};font-size:22px;cursor:pointer">${e}</button>
+          <div style="font-size:9px;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:.04em">${moodLabels[i]}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  html+=`<div class="section-lbl">Last 7 Days</div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:4px">
+      ${last7.map(ds=>{
+        const m=S.moods[ds]||{};
+        const d=new Date(ds+'T00:00');
+        const label=d.toLocaleDateString('en-AU',{weekday:'short'}).slice(0,1);
+        const hv=m.his||0,ev=m.her||0;
+        return`<div style="flex:1;text-align:center">
+          <div style="display:flex;flex-direction:column;gap:3px;align-items:center;margin-bottom:4px">
+            ${[5,4,3,2,1].map(v=>`<div style="width:12px;height:12px;border-radius:3px;background:${hv>=v?'var(--his)':'var(--b2)'}"></div>`).join('')}
+          </div>
+          <div style="font-size:9px;color:var(--t3)">${label}</div>
+          <div style="display:flex;flex-direction:column;gap:3px;align-items:center;margin-top:4px">
+            ${[5,4,3,2,1].map(v=>`<div style="width:12px;height:12px;border-radius:3px;background:${ev>=v?'var(--her)':'var(--b2)'}"></div>`).join('')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:10px;font-size:11px">
+      <span style="color:var(--his)">■ ${esc(p.hisName)}</span>
+      <span style="color:var(--her)">■ ${esc(p.herName)}</span>
+    </div>
+  </div>`;
+  return html;
+}
+
+// NOTES SUB
+function renderNotesSub(){
+  const p=S.profile;
+  const typeColors={personal:'#8B6E85',idea:'#F59E0B',todo:'#10B981',memory:'#A855F7',reminder:'#0EA5E9',important:'#EF4444'};
+  const typeLabels={personal:'💭 Personal',idea:'💡 Idea',todo:'✅ Todo',memory:'🌟 Memory',reminder:'⏰ Reminder',important:'🔴 Important'};
+  const pinned=S.notes.filter(n=>n.pinned&&(n.person==='both'||true));
+  const normal=S.notes.filter(n=>!n.pinned);
+  let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div class="tab-row" style="margin:0">
+      <button class="tab ${S.noteFilter==='both'?'active-both':''}" onclick="S.noteFilter='both';renderView()">Shared</button>
+      <button class="tab ${S.noteFilter==='his'?'active-his':''}" onclick="S.noteFilter='his';renderView()">${esc(p.hisName)}</button>
+      <button class="tab ${S.noteFilter==='her'?'active-her':''}" onclick="S.noteFilter='her';renderView()">${esc(p.herName)}</button>
+    </div>
+  </div>`;
+
+  const filtered=[...pinned,...normal].filter(n=>S.noteFilter==='both'||(n.person==='both'||n.person===S.noteFilter));
+  if(pinned.filter(n=>S.noteFilter==='both'||n.person==='both'||n.person===S.noteFilter).length)
+    html+=`<div class="pinned-banner">📌 Pinned notes</div>`;
+
+  if(!filtered.length)html+=`<div class="empty"><div class="empty-icon">📝</div><div class="empty-title">No notes yet</div></div>`;
+  filtered.forEach(n=>{
+    const typeColor=typeColors[n.type||'personal']||'var(--t2)';
+    const typeLabel=typeLabels[n.type||'personal']||'Personal';
+    html+=`<div class="note-card" style="border-left-color:${typeColor};opacity:${n.read?0.6:1}">
+      <div style="position:absolute;top:0;left:0;width:3px;height:100%;background:${typeColor};border-radius:3px 0 0 3px"></div>
+      <div style="padding-left:4px;cursor:pointer" onclick="openEditNote('${n.id}')">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px">
+          <div class="note-title">${esc(n.title)||'Untitled'}</div>
+          <button onclick="event.stopPropagation();toggleNoteRead('${n.id}')" style="color:${n.read?'var(--green)':'var(--t3)'};font-size:14px;background:none;border:none;cursor:pointer;padding:0 4px">${n.read?'✓':''}</button>
+        </div>
+        <div style="font-size:10px;color:${typeColor};font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">${typeLabel}</div>
+        <div class="note-preview">${esc(n.body)}</div>
+        <div class="note-footer">
+          <div class="note-date">${fmtDateShort(n.updated||n.createdAt||todayStr())}</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            ${n.pinned?'<span class="pin-icon">📌</span>':''}
+            <button onclick="event.stopPropagation();deleteNote('${n.id}')" style="color:var(--t3);font-size:13px;background:none;border:none;cursor:pointer">🗑</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+  html+=`<button class="add-btn" onclick="openNewNote()">+ New Note</button>`;
+  return html;
+}
+
+function openNewNote(){
+  S.editNoteId=null;
+  clearForm('note-modal');
+  document.getElementById('nm-who').value='both';
+  document.getElementById('nm-pin').value='0';
+  document.getElementById('nm-type').value='personal';
+  document.getElementById('nm-read').checked=false;
+  document.getElementById('note-modal-title').textContent='New Note';
+  openModal('note-modal');
+}
+function openEditNote(id){
+  const n=S.notes.find(x=>x.id===id);if(!n)return;
+  S.editNoteId=id;
+  document.getElementById('nm-title').value=n.title||'';document.getElementById('nm-body').value=n.body||'';document.getElementById('nm-who').value=n.person||'both';document.getElementById('nm-pin').value=n.pinned?'1':'0';document.getElementById('nm-type').value=n.type||'personal';document.getElementById('nm-read').checked=n.read||false;
+  document.getElementById('note-modal-title').textContent='Edit Note';openModal('note-modal');
+}
+
+function updateColorSwatch(){
+  const color=document.getElementById('em-color').value;
+  document.getElementById('em-colors').querySelectorAll('.color-swatch').forEach(s=>{
+    s.classList.toggle('sel',s.dataset.color===color);
+  });
+}
+async function saveNote(){
+  const title=document.getElementById('nm-title').value.trim();
+  const body=document.getElementById('nm-body').value.trim();
+  if(!title&&!body){flash('Enter a title or note','er');return;}
+  if(S.editNoteId){
+    const n=S.notes.find(x=>x.id===S.editNoteId);
+    if(n){
+      const old={title:n.title,body:n.body,person:n.person,pinned:n.pinned,type:n.type,read:n.read,updated:n.updated};
+      n.title=title;n.body=body;n.person=document.getElementById('nm-who').value;n.pinned=document.getElementById('nm-pin').value==='1';n.type=document.getElementById('nm-type').value;n.read=document.getElementById('nm-read').checked;n.updated=new Date().toISOString();
+      try{
+        await DB.set('notes',S.notes);renderView();flash('Note updated');
+      }catch(e){
+        Object.assign(n,old);
+        flash('Failed to update','er');console.error('Update error:',e);
+      }
+    }
+  } else {
+    const newNote={id:uid(),title,body,person:document.getElementById('nm-who').value,pinned:document.getElementById('nm-pin').value==='1',type:document.getElementById('nm-type').value,read:document.getElementById('nm-read').checked,createdAt:new Date().toISOString(),updated:new Date().toISOString()};
+    S.notes.unshift(newNote);
+    try{
+      S.notes.sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0));
+      await DB.set('notes',S.notes);closeModal('note-modal');S.editNoteId=null;renderView();flash('Note saved');
+    }catch(e){
+      S.notes=S.notes.filter(n=>n.id!==newNote.id);
+      flash('Failed to save','er');console.error('Save error:',e);
+    }
+  }
+}
+async function toggleNoteRead(id){
+  const n=S.notes.find(x=>x.id===id);
+  if(!n)return;
+  const wasRead=n.read;
+  n.read=!n.read;
+  try{
+    await DB.set('notes',S.notes);
+    renderView();
+    flash(n.read?'Marked as read':'Marked as unread','info');
+  }catch(e){
+    n.read=wasRead;
+    flash('Failed to update','er');console.error('Toggle error:',e);
+  }
+}
+
+async function toggleLoveNoteRead(id){
+  const n=S.love_notes.find(x=>x.id===id);
+  if(!n)return;
+  const wasRead=n.read;
+  n.read=!n.read;
+  try{
+    await DB.set('love_notes',S.love_notes);
+    renderView();
+    flash(n.read?'Marked as read':'Marked as unread','info');
+  }catch(e){
+    n.read=wasRead;
+    flash('Failed to update','er');console.error('Toggle error:',e);
+  }
+}
+
+async function deleteNote(id){
+  const original=[...S.notes];
+  S.notes=S.notes.filter(n=>n.id!==id);
+  try{
+    await DB.set('notes',S.notes);renderView();flash('Deleted','info');
+  }catch(e){
+    S.notes=original;
+    flash('Failed to delete','er');console.error('Delete error:',e);
+  }
+}
+
+// MEMORIES SUB
+function renderMemoriesSub(){
+  let html=``;
+  if(!S.memories.length)html+=`<div class="empty"><div class="empty-icon">🌟</div><div class="empty-title">No memories yet</div><div style="font-size:13px;color:var(--t3)">Start adding your milestones</div></div>`;
+  S.memories.slice().sort((a,b)=>b.date.localeCompare(a.date)).forEach(m=>{
+    html+=`<div class="memory-card">
+      <div class="memory-emoji">${m.emoji||'🌟'}</div>
+      <div class="memory-info">
+        <div class="memory-title">${esc(m.title)}</div>
+        <div class="memory-date">📅 ${fmtDate(m.date)}</div>
+        ${m.note?`<div class="memory-note">${esc(m.note)}</div>`:''}
+      </div>
+      <button onclick="deleteMemory('${m.id}')" style="color:var(--t3);font-size:15px;background:none;border:none;cursor:pointer;padding:4px">🗑</button>
+    </div>`;
+  });
+  html+=`<button class="add-btn" onclick="openModal('mem-modal')">+ Add Memory</button>`;
+  return html;
+}
+async function saveMemory(){
+  const title=document.getElementById('mm-title').value.trim();
+  if(!title){flash('Enter a title','er');return;}
+  S.memories.push({id:uid(),title,date:document.getElementById('mm-date').value||todayStr(),emoji:document.getElementById('mm-emoji').value.trim()||'🌟',note:document.getElementById('mm-note').value.trim()});
+  closeModal('mem-modal');
+  try{
+    await DB.set('memories',S.memories);clearForm('mem-modal');renderView();flash('Memory saved 🌟');
+  }catch(e){
+    S.memories.pop();
+    flash('Failed to save','er');console.error('Save error:',e);
+  }
+}
+async function deleteMemory(id){
+  const original=[...S.memories];
+  S.memories=S.memories.filter(m=>m.id!==id);
+  try{
+    await DB.set('memories',S.memories);renderView();flash('Deleted','info');
+  }catch(e){
+    S.memories=original;
+    flash('Failed to delete','er');console.error('Delete error:',e);
+  }
+}
+
+// LOVE NOTES SUB
+function renderLoveNotes(){
+  const p=S.profile;
+  const unread=S.love_notes.filter(n=>!n.read).length;
+  let html=``;
+  if(unread){html+=`<div style="background:var(--her-bg);border:1px solid rgba(225,29,72,.3);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px;color:var(--her);font-weight:600;font-size:13px;cursor:pointer" onclick="markAllLoveNotesRead()">💌 ${unread} unread message${unread>1?'s':''} — tap to mark all read</div>`;}
+  if(!S.love_notes.length)html+=`<div class="empty"><div class="empty-icon">💌</div><div class="empty-title">No love notes yet</div><div style="font-size:13px;color:var(--t3)">Write something sweet</div></div>`;
+  S.love_notes.forEach(n=>{
+    const fromHim=n.from==='his';
+    const bgColor=fromHim?'var(--his-bg)':'var(--her-bg)';
+    const fromColor=fromHim?'var(--his)':'var(--her)';
+    const fromName=fromHim?p.hisName:p.herName;
+    html+=`<div class="love-note-card" style="background:${bgColor};border:1px solid ${fromHim?'rgba(99,102,241,.25)':'rgba(225,29,72,.25)'};cursor:pointer" onclick="openViewLoveNote('${n.id}')">
+      <div class="love-note-from" style="color:${fromColor}">From ${esc(fromName)} ${!n.read?'<span class="unread-badge">NEW</span>':'<span style="color:var(--green);font-size:10px;font-weight:700">✓ Read</span>'}💌</div>
+      <div class="love-note-msg">"${esc(n.message)}"</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="love-note-date">${fmtDateShort(n.date)}</div>
+        <div style="display:flex;gap:6px">
+          <button onclick="event.stopPropagation();toggleLoveNoteRead('${n.id}')" style="color:${n.read?'var(--green)':'var(--t3)'};font-size:14px;background:none;border:none;cursor:pointer;padding:0 2px">${n.read?'✓':''}</button>
+          <button onclick="event.stopPropagation();deleteLoveNote('${n.id}')" style="color:var(--t3);font-size:13px;background:none;border:none;cursor:pointer">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  });
+  html+=`<button class="add-btn" onclick="openModal('ln-modal')">💌 Write a Love Note</button>`;
+  return html;
+}
+
+function openViewLoveNote(id){
+  const n=S.love_notes.find(x=>x.id===id);
+  if(!n)return;
+  S.viewingLoveNoteId=id;
+  const p=S.profile;
+  const fromHim=n.from==='his';
+  const fromColor=fromHim?'var(--his)':'var(--her)';
+  const fromName=fromHim?p.hisName:p.herName;
+  document.getElementById('read-ln-from').textContent=`From ${fromName}`;
+  document.getElementById('read-ln-from').style.color=fromColor;
+  document.getElementById('read-ln-msg').textContent=`"${n.message}"`;
+  document.getElementById('read-ln-date').textContent=fmtDate(n.date);
+  
+  // Show status or buttons based on read status
+  const statusEl=document.getElementById('read-ln-status');
+  if(n.read){
+    statusEl.textContent=`✓ Read on ${fmtDate(n.readAt||n.date)}`;
+    statusEl.style.display='block';
+    document.getElementById('read-by-him').style.display='none';
+    document.getElementById('read-by-her').style.display='none';
+  }else{
+    statusEl.style.display='none';
+    document.getElementById('read-by-him').style.display='block';
+    document.getElementById('read-by-her').style.display='block';
+  }
+  openModal('read-ln-modal');
+}
+
+async function markLoveNoteRead(who){
+  const n=S.love_notes.find(x=>x.id===S.viewingLoveNoteId);
+  if(!n)return;
+  const old={read:n.read,readBy:n.readBy,readAt:n.readAt};
+  n.read=true;
+  n.readBy=who;
+  n.readAt=new Date().toISOString();
+  try{
+    await DB.set('love_notes',S.love_notes);
+    renderView();
+    flash(`💌 Marked as read by ${who==='his'?'him':'her'}`, 'info');
+  }catch(e){
+    Object.assign(n,old);
+    flash('Failed to update','er');console.error('Update error:',e);
+  }
+}
+
+async function markAllLoveNotesRead(){
+  const original=S.love_notes.map(n=>({...n}));
+  S.love_notes.forEach(n=>{if(!n.read){n.read=true;n.readBy='both';n.readAt=new Date().toISOString();}});
+  try{
+    await DB.set('love_notes',S.love_notes);renderView();flash('All love notes read','info');
+  }catch(e){
+    S.love_notes=original;
+    flash('Failed to update','er');console.error('Update error:',e);
+  }
+}
+
+// BUCKET LIST SUB
+function renderBucket(){
+  const open=S.bucket.filter(b=>!b.done),done=S.bucket.filter(b=>b.done);
+  const priIcons={low:'🌟',med:'🎯',high:'🔥'};
+  let html=`<div style="font-size:12px;color:var(--t3);margin-bottom:12px">${done.length} of ${S.bucket.length} completed</div>`;
+  if(!S.bucket.length)html+=`<div class="empty"><div class="empty-icon">🌍</div><div class="empty-title">Bucket list is empty</div></div>`;
+  [...open,...done].forEach(b=>{
+    html+=`<div class="bucket-item ${b.done?'done-bucket':''}">
+      <div class="bucket-check ${b.done?'done':''}" onclick="toggleBucket('${b.id}')">${b.done?'✓':''}</div>
+      <div class="bucket-text">${priIcons[b.priority]||'🌟'} ${esc(b.text)}</div>
+      <button onclick="deleteBucket('${b.id}')" style="color:var(--t3);font-size:15px;background:none;border:none;cursor:pointer;padding:2px 6px">🗑</button>
+    </div>`;
+  });
+  html+=`<button class="add-btn" onclick="openModal('bucket-modal')">+ Add to Bucket List</button>`;
+  return html;
+}
+async function saveBucket(){
+  const text=document.getElementById('bm-text').value.trim();
+  if(!text){flash('Enter a dream or goal','er');return;}
+  S.bucket.push({id:uid(),text,priority:document.getElementById('bm-pri').value,done:false});
+  closeModal('bucket-modal');
+  try{
+    await DB.set('bucket',S.bucket);document.getElementById('bm-text').value='';renderView();flash('Added to bucket list 🌍');
+  }catch(e){
+    S.bucket.pop();
+    flash('Failed to save','er');console.error('Save error:',e);
+  }
+}
+async function toggleBucket(id){
+  const b=S.bucket.find(x=>x.id===id);if(!b)return;
+  const wasDone=b.done;
+  b.done=!b.done;
+  try{
+    if(b.done)flash('🎉 Bucket list item complete!');
+    await DB.set('bucket',S.bucket);renderView();
+  }catch(e){
+    b.done=wasDone;
+    flash('Failed to update','er');console.error('Toggle error:',e);
+  }
+}
+async function deleteBucket(id){
+  const original=[...S.bucket];
+  S.bucket=S.bucket.filter(b=>b.id!==id);
+  try{
+    await DB.set('bucket',S.bucket);renderView();flash('Deleted','info');
+  }catch(e){
+    S.bucket=original;
+    flash('Failed to delete','er');console.error('Delete error:',e);
+  }
+}
+
+// MONEY SUB
+function renderMoney(){
+  const p=S.profile;
+  const debtTotals=S.debts.reduce((totals,d)=>{
+    const total=pv(d.amount);
+    const paid=Math.min(total,pv(d.amount_paid||0));
+    totals.total+=total;
+    totals.paid+=paid;
+    totals.remaining+=Math.max(0,total-paid);
+    return totals;
+  },{total:0,paid:0,remaining:0});
+  let hisOwes=0,herOwes=0;
+  S.expenses.forEach(e=>{
+    if(e.settled)return;
+    const a=pv(e.amount);
+    if(e.split==='equal'){
+      if(e.paidBy==='his')herOwes+=a/2;
+      else hisOwes+=a/2;
+    } else if(e.split==='his'&&e.paidBy==='her'){
+      hisOwes+=a;
+    } else if(e.split==='her'&&e.paidBy==='his'){
+      herOwes+=a;
+    }
+  });
+  const net=herOwes-hisOwes;
+  let html=``;
+
+  // Debt summary from all loans/payments
+  html+=`<div class="balance-card" style="background:${debtTotals.remaining===0?'var(--s2)':'rgba(245,158,11,.08)'};border:1px solid ${debtTotals.remaining===0?'var(--b2)':'rgba(245,158,11,.35)'}">
+    <div class="balance-num" style="color:${debtTotals.remaining===0?'var(--t1)':'var(--gold)'}">${fm(debtTotals.paid)} of ${fm(debtTotals.total)} paid</div>
+    <div class="balance-label">${debtTotals.remaining===0?'All debts paid':fm(debtTotals.remaining)+' remaining across loans'}</div>
+  </div>`;
+  
+  // Balance from expenses
+  html+=`<div class="balance-card" style="background:${net===0?'var(--s2)':net>0?'var(--his-bg)':'var(--her-bg)'};border:1px solid ${net===0?'var(--b2)':net>0?'rgba(99,102,241,.3)':'rgba(225,29,72,.3)'}">
+    <div class="balance-num" style="color:${net===0?'var(--t1)':net>0?'var(--his)':'var(--her)'}">${net===0?'All Square ✓':net>0?fm(Math.abs(net)):fm(Math.abs(net))}</div>
+    <div class="balance-label">${net===0?'No one owes anything':net>0?esc(p.herName)+' owes '+esc(p.hisName):esc(p.hisName)+' owes '+esc(p.herName)}</div>
+  </div>`;
+  
+  if(net!==0){
+    html+=`<button class="add-btn" style="border-style:solid;border-color:var(--green);color:var(--green);margin-bottom:14px" onclick="showSettlement()">💚 Settle Up</button>`;
+  }
+
+  // Debts section - organized by debtor
+  html+=`<div class="section-lbl">💳 Debts & Loans</div>`;
+  const debtsByHim=S.debts.filter(d=>d.who==='his');
+  const debtsByHer=S.debts.filter(d=>d.who==='her');
+  const debtsByBoth=S.debts.filter(d=>d.who==='both');
+  
+  if(!S.debts.length){
+    html+=`<div class="empty" style="padding:20px 0"><div style="font-size:12px;color:var(--t3)">No debts</div></div>`;
+  }else{
+    // Owed by Him
+    if(debtsByHim.length){
+      html+=`<div style="font-size:12px;color:var(--his);font-weight:700;margin-top:12px;margin-bottom:8px">Owed by ${p.hisName}</div>`;
+      debtsByHim.forEach(d=>{
+        const amountPaid=pv(d.amount_paid||0);
+        const totalAmount=pv(d.amount);
+        const remaining=Math.max(0,totalAmount-amountPaid);
+        const pct=Math.min(100,Math.round((amountPaid/totalAmount)*100));
+        html+=`<div style="background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:12px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+            <div>
+              <div style="font-weight:600;color:var(--t1);margin-bottom:2px">${esc(d.desc)}</div>
+              <div style="font-size:11px;color:var(--t3)">${d.note?esc(d.note):''}</div>
+            </div>
+            <button onclick="deleteDebt('${d.id}')" style="color:var(--t3);font-size:13px;background:none;border:none;cursor:pointer">🗑</button>
+          </div>
+          <div style="background:rgba(99,102,241,.1);height:6px;border-radius:3px;margin-bottom:8px;overflow:hidden">
+            <div style="background:var(--his);height:100%;width:${pct}%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
+            <span style="color:var(--t3)">${fm(amountPaid)} of ${fm(totalAmount)} paid - ${fm(remaining)} remaining</span>
+            <button onclick="openPaymentModal('${d.id}')" style="background:var(--his);color:white;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Update</button>
+          </div>
+        </div>`;
+      });
+    }
+    
+    // Owed by Her
+    if(debtsByHer.length){
+      html+=`<div style="font-size:12px;color:var(--her);font-weight:700;margin-top:12px;margin-bottom:8px">Owed by ${p.herName}</div>`;
+      debtsByHer.forEach(d=>{
+        const amountPaid=pv(d.amount_paid||0);
+        const totalAmount=pv(d.amount);
+        const remaining=Math.max(0,totalAmount-amountPaid);
+        const pct=Math.min(100,Math.round((amountPaid/totalAmount)*100));
+        html+=`<div style="background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:12px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+            <div>
+              <div style="font-weight:600;color:var(--t1);margin-bottom:2px">${esc(d.desc)}</div>
+              <div style="font-size:11px;color:var(--t3)">${d.note?esc(d.note):''}</div>
+            </div>
+            <button onclick="deleteDebt('${d.id}')" style="color:var(--t3);font-size:13px;background:none;border:none;cursor:pointer">🗑</button>
+          </div>
+          <div style="background:rgba(225,29,72,.1);height:6px;border-radius:3px;margin-bottom:8px;overflow:hidden">
+            <div style="background:var(--her);height:100%;width:${pct}%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
+            <span style="color:var(--t3)">${fm(amountPaid)} of ${fm(totalAmount)} paid - ${fm(remaining)} remaining</span>
+            <button onclick="openPaymentModal('${d.id}')" style="background:var(--her);color:white;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Update</button>
+          </div>
+        </div>`;
+      });
+    }
+    
+    // Owed by Both
+    if(debtsByBoth.length){
+      html+=`<div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:12px;margin-bottom:8px">Owed by Both</div>`;
+      debtsByBoth.forEach(d=>{
+        const amountPaid=pv(d.amount_paid||0);
+        const totalAmount=pv(d.amount);
+        const remaining=Math.max(0,totalAmount-amountPaid);
+        const pct=Math.min(100,Math.round((amountPaid/totalAmount)*100));
+        html+=`<div style="background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:12px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+            <div>
+              <div style="font-weight:600;color:var(--t1);margin-bottom:2px">${esc(d.desc)}</div>
+              <div style="font-size:11px;color:var(--t3)">${d.note?esc(d.note):''}</div>
+            </div>
+            <button onclick="deleteDebt('${d.id}')" style="color:var(--t3);font-size:13px;background:none;border:none;cursor:pointer">🗑</button>
+          </div>
+          <div style="background:rgba(245,158,11,.1);height:6px;border-radius:3px;margin-bottom:8px;overflow:hidden">
+            <div style="background:var(--gold);height:100%;width:${pct}%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
+            <span style="color:var(--t3)">${fm(amountPaid)} of ${fm(totalAmount)} paid - ${fm(remaining)} remaining</span>
+            <button onclick="openPaymentModal('${d.id}')" style="background:var(--gold);color:#000;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Update</button>
+          </div>
+        </div>`;
+      });
+    }
+  }
+  html+=`<button class="add-btn" onclick="openModal('debt-modal')">+ Add Debt</button>`;
+
+
+  // Bills section
+  html+=`<div class="section-lbl" style="margin-top:16px">📋 Upcoming Bills</div>`;
+  const today=todayStr();
+  const upcomingBills=S.bills.filter(b=>!b.paid&&new Date(b.dueDate)>=new Date()).sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+  if(!upcomingBills.length){
+    html+=`<div class="empty" style="padding:20px 0"><div style="font-size:12px;color:var(--t3)">No upcoming bills</div></div>`;
+  }else{
+    upcomingBills.slice(0,10).forEach(b=>{
+      const isDue=b.dueDate===today;
+      const daysUntil=Math.round((new Date(b.dueDate)-new Date())/86400000);
+      html+=`<div class="expense-item" style="${isDue?'border-color:var(--red)':''}">
+        <div class="expense-icon" style="background:${isDue?'rgba(239,68,68,.15)':'var(--s2)'};color:${isDue?'var(--red)':'var(--t3)'}">📋</div>
+        <div class="expense-info">
+          <div class="expense-desc">${esc(b.name)}${isDue?' <span style="color:var(--red);font-weight:700"> DUE TODAY</span>':''}</div>
+          <div class="expense-meta">${b.who==='both'?'Both':b.who==='his'?p.hisName:p.herName} · ${daysUntil===0?'Today':daysUntil===1?'Tomorrow':daysUntil+' days'} · ${b.repeat}</div>
+        </div>
+        <div class="expense-amount">${fm(pv(b.amount))}</div>
+        <button onclick="deleteBill('${b.id}')" style="color:var(--t3);font-size:15px;background:none;border:none;cursor:pointer;padding:2px 6px">🗑</button>
+      </div>`;
+    });
+  }
+  html+=`<button class="add-btn" onclick="openModal('bill-modal')">+ Add Bill</button>`;
+
+  // Recent expenses
+  const EICONS={food:'🍽',home:'🏠',fun:'🎉',travel:'✈️',health:'💊',other:'📦'};
+  const unsettled=S.expenses.filter(e=>!e.settled);
+  if(unsettled.length){
+    html+=`<div class="section-lbl" style="margin-top:16px">💰 Recent Expenses</div>`;
+    unsettled.slice(0,15).forEach(e=>{
+      const col=e.paidBy==='his'?'var(--his)':'var(--her)';
+      const who=e.paidBy==='his'?p.hisName:p.herName;
+      html+=`<div class="expense-item">
+        <div class="expense-icon" style="background:${e.paidBy==='his'?'var(--his-bg)':'var(--her-bg)'}">${EICONS[e.cat]||'📦'}</div>
+        <div class="expense-info">
+          <div class="expense-desc">${esc(e.desc)}</div>
+          <div class="expense-meta">${esc(who)} paid · ${e.split==='equal'?'Split 50/50':e.split==='his'?esc(p.hisName)+' pays all':esc(p.herName)+' pays all'} · ${fmtDateShort(e.date)}</div>
+        </div>
+        <div class="expense-amount" style="color:${col}">${fm(pv(e.amount))}</div>
+        <button onclick="deleteExpense('${e.id}')" style="color:var(--t3);font-size:15px;background:none;border:none;cursor:pointer;padding:2px 6px">🗑</button>
+      </div>`;
+    });
+    html+=`<button class="add-btn" onclick="openModal('exp-modal')">+ Add Expense</button>`;
+  }else{
+    html+=`<div class="section-lbl" style="margin-top:16px">💰 Expenses</div>
+    <button class="add-btn" onclick="openModal('exp-modal')">+ Add Expense</button>`;
+  }
+  return html;
+}
+async function saveExpense(){
+  const desc=document.getElementById('exm-desc').value.trim();
+  const amount=pv(document.getElementById('exm-amount').value);
+  if(!desc||!amount){flash('Enter description and amount','er');return;}
+  S.expenses.unshift({id:uid(),desc,amount,paidBy:document.getElementById('exm-who').value,split:document.getElementById('exm-split').value,cat:document.getElementById('exm-cat').value,date:todayStr()});
+  closeModal('exp-modal');
+  try{
+    await DB.set('expenses',S.expenses);clearForm('exp-modal');renderView();flash('Expense added');
+  }catch(e){
+    S.expenses.shift();
+    flash('Failed to save','er');console.error('Save error:',e);
+  }
+}
+async function deleteExpense(id){
+  const original=[...S.expenses];
+  S.expenses=S.expenses.filter(e=>e.id!==id);
+  try{
+    await DB.set('expenses',S.expenses);renderView();flash('Deleted','info');
+  }catch(e){
+    S.expenses=original;
+    flash('Failed to delete','er');console.error('Delete error:',e);
+  }
+}
+
+// Debt management
+async function saveDebt(){
+  const desc=document.getElementById('dm-desc').value.trim();
+  const amount=pv(document.getElementById('dm-amount').value);
+  if(!desc||!amount){flash('Enter description and amount','er');return;}
+  S.debts.unshift({id:uid(),desc,amount,amount_paid:0,who:document.getElementById('dm-who').value,note:document.getElementById('dm-note').value.trim(),date:todayStr()});
+  closeModal('debt-modal');
+  try{
+    await DB.set('debts',S.debts);clearForm('debt-modal');renderView();flash('Debt added');
+  }catch(e){
+    S.debts.shift();
+    flash('Failed to save','er');console.error('Save error:',e);
+  }
+}
+
+function openPaymentModal(debtId){
+  const d=S.debts.find(x=>x.id===debtId);
+  if(!d)return;
+  S.editDebtId=debtId;
+  document.getElementById('pm-desc').textContent=esc(d.desc);
+  const totalAmount=pv(d.amount);
+  const alreadyPaid=pv(d.amount_paid||0);
+  const remaining=totalAmount-alreadyPaid;
+  document.getElementById('pm-total').textContent=fm(totalAmount);
+  document.getElementById('pm-already-paid').textContent=fm(alreadyPaid);
+  document.getElementById('pm-remaining').textContent=fm(remaining);
+  document.getElementById('pm-payment').value='';
+  openModal('payment-modal');
+}
+
+async function updateDebtPayment(){
+  const newPayment=pv(document.getElementById('pm-payment').value);
+  if(!newPayment){flash('Enter payment amount','er');return;}
+  const d=S.debts.find(x=>x.id===S.editDebtId);
+  if(!d)return;
+  const totalAmount=pv(d.amount);
+  const currentPaid=pv(d.amount_paid||0);
+  const newTotal=currentPaid+newPayment;
+  if(newTotal>totalAmount){flash(`Cannot exceed debt amount. Remaining: ${fm(totalAmount-currentPaid)}`,'er');return;}
+  const oldPaid=d.amount_paid||0;
+  d.amount_paid=newTotal;
+  closeModal('payment-modal');
+  try{
+    await DB.set('debts',S.debts);renderView();flash(`Payment of ${fm(newPayment)} added`);S.editDebtId=null;
+  }catch(e){
+    d.amount_paid=oldPaid;
+    flash('Failed to update','er');console.error('Update error:',e);
+  }
+}
+async function deleteDebt(id){
+  const original=[...S.debts];
+  S.debts=S.debts.filter(d=>d.id!==id);
+  try{
+    await DB.set('debts',S.debts);renderView();flash('Deleted','info');
+  }catch(e){
+    S.debts=original;
+    flash('Failed to delete','er');console.error('Delete error:',e);
+  }
+}
+
+// Bill management
+async function saveBill(){
+  const name=document.getElementById('bm-name').value.trim();
+  const amount=pv(document.getElementById('bm-amount').value);
+  const dueDate=document.getElementById('bm-date').value;
+  if(!name||!amount||!dueDate){flash('Enter all bill details','er');return;}
+  S.bills.unshift({id:uid(),name,amount,dueDate,repeat:document.getElementById('bm-repeat').value,who:document.getElementById('bm-who').value,paid:false,date:todayStr()});
+  closeModal('bill-modal');
+  try{
+    await DB.set('bills',S.bills);clearForm('bill-modal');renderView();flash('Bill added');
+  }catch(e){
+    S.bills.shift();
+    flash('Failed to save','er');console.error('Save error:',e);
+  }
+}
+async function deleteBill(id){
+  const original=[...S.bills];
+  S.bills=S.bills.filter(b=>b.id!==id);
+  try{
+    await DB.set('bills',S.bills);renderView();flash('Deleted','info');
+  }catch(e){
+    S.bills=original;
+    flash('Failed to delete','er');console.error('Delete error:',e);
+  }
+}
+
+// DATE JAR SUB
+const DEFAULT_IDEAS=['Sunset picnic in the park','Cook a new recipe together','Movie marathon with blankets','Take a day trip somewhere new','Dance class together','Stargazing with hot drinks','Breakfast in bed for each other','Try an escape room','Visit a farmers market','Paint & sip night at home','Go to a comedy show','Recreate your first date','Take a scenic hike','Pottery class together','Book a surprise spa day'];
+
+function renderDateJar(){
+  const ideas=S.date_ideas.length?S.date_ideas:DEFAULT_IDEAS.map((idea,i)=>({id:'d'+i,idea,done:false,rating:0}));
+  if(!S.date_ideas.length)S.date_ideas=ideas;
+  let html=`
+  <div class="jar-spin-wrap">
+    <div style="font-size:48px;margin-bottom:8px">🫙</div>
+    <div style="font-size:14px;color:var(--t3);margin-bottom:14px">Spin the jar for tonight's date idea</div>
+    <div class="jar-result" id="jar-result">
+      <div class="jar-idea" id="jar-idea">Tap spin to pick a date idea!</div>
+    </div>
+    <button class="spin-btn" onclick="spinJar()">✨ Spin the Jar</button>
+  </div>
+  <div class="section-lbl">All Ideas (${S.date_ideas.filter(i=>i.done).length}/${S.date_ideas.length} done)</div>`;
+  S.date_ideas.forEach(i=>{
+    html+=`<div class="date-idea-item">
+      <div class="idea-text ${i.done?'idea-done':''}">${esc(i.idea)}</div>
+      <button class="star-btn" onclick="rateIdea('${i.id}')" title="Mark done">${i.done?'⭐':'☆'}</button>
+      <button onclick="deleteIdea('${i.id}')" style="color:var(--t3);font-size:14px;background:none;border:none;cursor:pointer;padding:2px 4px">🗑</button>
+    </div>`;
+  });
+  html+=`<button class="add-btn" onclick="openModal('idea-modal')">+ Add Idea</button>`;
+  return html;
+}
+
+function spinJar(){
+  const available=S.date_ideas.filter(i=>!i.done);
+  if(!available.length){document.getElementById('jar-idea').textContent='All ideas completed! Add more 🎉';return;}
+  const pick=available[Math.floor(Math.random()*available.length)];
+  const el=document.getElementById('jar-idea');
+  el.style.opacity='0';el.style.transform='scale(.95)';
+  setTimeout(()=>{el.textContent=pick.idea;el.style.transition='all .3s ease';el.style.opacity='1';el.style.transform='scale(1)';},200);
+}
+async function rateIdea(id){
+  const i=S.date_ideas.find(x=>x.id===id);if(!i)return;
+  const wasDone=i.done;
+  i.done=!i.done;
+  try{
+    if(i.done)flash('Date night done! ⭐');
+    await DB.set('date_ideas',S.date_ideas);renderView();
+  }catch(e){
+    i.done=wasDone;
+    flash('Failed to update','er');console.error('Update error:',e);
+  }
+}
+async function deleteIdea(id){S.date_ideas=S.date_ideas.filter(i=>i.id!==id);await DB.set('date_ideas',S.date_ideas);renderView();flash('Removed','info');}
+async function saveIdea(){
+  const idea=document.getElementById('im-idea').value.trim();
+  if(!idea){flash('Enter an idea','er');return;}
+  S.date_ideas.push({id:uid(),idea,done:false,rating:0});
+  closeModal('idea-modal');clearForm('idea-modal');
+  await DB.set('date_ideas',S.date_ideas);renderView();flash('Added to jar!');
+}
+
+// ═══════════════════════════════════════════════════════════
+// SETTINGS (accessible from More > Settings)
+// ═══════════════════════════════════════════════════════════
+function renderSettings(){
+  const p=S.profile;
+  let html=`
+  <div class="card" style="margin-bottom:14px">
+    <div class="setup-section" style="margin-bottom:12px">Your Names</div>
+    <div class="couple-row">
+      <div class="field">
+        <label>His Name</label>
+        <input type="text" id="set-his" placeholder="e.g. James" value="${esc(p.hisName)}" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Her Name</label>
+        <input type="text" id="set-her" placeholder="e.g. Sophie" value="${esc(p.herName)}" autocomplete="off">
+      </div>
+    </div>
+    <div class="field">
+      <label>Anniversary Date</label>
+      <input type="date" id="set-anniv" value="${p.anniversary||''}">
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="setup-section" style="margin-bottom:12px">Your Colours</div>
+    <div class="field">
+      <label style="margin-bottom:8px">His Colour</label>
+      <div class="color-row" id="set-his-colors">
+        ${['#6366F1','#3B82F6','#0EA5E9','#10B981','#8B5CF6','#F59E0B'].map(c=>`<div class="color-swatch ${p.hisColor===c?'sel':''}" data-color="${c}" style="background:${c}" onclick="pickSettingColor('his','${c}',this)"></div>`).join('')}
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label style="margin-bottom:8px">Her Colour</label>
+      <div class="color-row" id="set-her-colors">
+        ${['#E11D48','#EC4899','#A855F7','#F97316','#EF4444','#D946EF'].map(c=>`<div class="color-swatch ${p.herColor===c?'sel':''}" data-color="${c}" style="background:${c}" onclick="pickSettingColor('her','${c}',this)"></div>`).join('')}
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-primary" onclick="saveSettings()" id="save-settings-btn" style="width:100%;margin-bottom:10px">💾 Save Changes</button>
+  `;
+  return html;
+}
+
+function pickSettingColor(who,color,el){
+  const colId=who==='his'?'set-his-colors':'set-her-colors';
+  document.getElementById(colId).querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('sel'));
+  el.classList.add('sel');
+  S.profile[who==='his'?'hisColor':'herColor']=color;
+}
+
+async function saveSettings(){
+  const his=document.getElementById('set-his').value.trim();
+  const her=document.getElementById('set-her').value.trim();
+  const anniv=document.getElementById('set-anniv').value;
+  
+  if(!his||!her){flash('Please enter both names','er');return;}
+  
+  S.profile.hisName=his;
+  S.profile.herName=her;
+  S.profile.anniversary=anniv;
+  
+  const btn=document.getElementById('save-settings-btn');
+  btn.disabled=true;
+  const oldText=btn.textContent;
+  btn.textContent='Saving…';
+  
+  try{
+    await DB.set('profile',S.profile);
+    applyColors(S.profile);
+    // Update banner with new names and anniversary
+    document.getElementById('bn-his').textContent=his;
+    document.getElementById('bn-her').textContent=her;
+    updateBannerSub();
+    renderView();
+    flash('✓ Settings saved!','ok');
+  }catch(e){
+    console.error('Settings save error:',e);
+    flash('Failed to save settings','er');
+  }finally{
+    btn.disabled=false;
+    btn.textContent=oldText;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// RECURRING EVENTS
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('change',function(e){
+  if(e.target.id==='em-repeat'){
+    const repeatField=document.getElementById('repeat-until-field');
+    if(e.target.value==='never'){
+      repeatField.style.display='none';
+      document.getElementById('em-repeat-until').value='';
+    }else{
+      repeatField.style.display='block';
+    }
+    if(e.target.value==='birthday'||e.target.value==='anniv'){
+      e.target.value='yearly';
+    }
+  }
+});
+function generateRecurringEvents(event,repeatType,repeatUntil){
+  if(repeatType==='never')return[event];
+  const events=[event];
+  let current=new Date(event.date+'T00:00');
+  const until=repeatUntil?new Date(repeatUntil+'T00:00'):new Date(current.getFullYear()+10,11,31);
+  while(true){
+    if(repeatType==='yearly')current.setFullYear(current.getFullYear()+1);
+    else if(repeatType==='weekly')current.setDate(current.getDate()+7);
+    if(current>until)break;
+    const newDate=`${current.getFullYear()}-${String(current.getMonth()+1).padStart(2,'0')}-${String(current.getDate()).padStart(2,'0')}`;
+    events.push({...event,id:uid(),date:newDate,recurring:repeatType});
+  }
+  return events;
+}
+
+// ═══════════════════════════════════════════════════════════
+// SMART EXPENSE SETTLEMENT
+// ═══════════════════════════════════════════════════════════
+function calculateBalance(){
+  let hisOwes=0,herOwes=0;
+  S.expenses.forEach(e=>{
+    if(e.settled)return;
+    const a=pv(e.amount);
+    if(e.split==='equal'){
+      if(e.paidBy==='his')herOwes+=a/2;
+      else hisOwes+=a/2;
+    }else if(e.split==='his'&&e.paidBy==='her'){
+      hisOwes+=a;
+    }else if(e.split==='her'&&e.paidBy==='his'){
+      herOwes+=a;
+    }
+  });
+  return{hisOwes,herOwes,net:herOwes-hisOwes};
+}
+function showSettlement(){
+  const bal=calculateBalance();
+  if(bal.hisOwes===0&&bal.herOwes===0){
+    flash('All squared up already!','info');
+    return;
+  }
+  const p=S.profile;
+  const txtEl=document.getElementById('settlement-text');
+  const amtEl=document.getElementById('settlement-amount');
+  const msgEl=document.getElementById('settlement-msg');
+  
+  if(bal.net>0){
+    txtEl.textContent=esc(p.herName)+' owes '+esc(p.hisName);
+    amtEl.textContent=fm(Math.abs(bal.net));
+    msgEl.textContent=esc(p.herName)+' pays '+fm(Math.abs(bal.net))+' to '+esc(p.hisName)+' to settle all';
+  }else if(bal.net<0){
+    txtEl.textContent=esc(p.hisName)+' owes '+esc(p.herName);
+    amtEl.textContent=fm(Math.abs(bal.net));
+    msgEl.textContent=esc(p.hisName)+' pays '+fm(Math.abs(bal.net))+' to '+esc(p.herName)+' to settle all';
+  }else{
+    msgEl.textContent='All expenses are evenly split!';
+  }
+  openModal('settlement-modal');
+}
+function confirmSettlement(){
+  S.expenses.forEach(e=>{if(!e.settled)e.settled=true;});
+  const btn=document.querySelector('#settlement-modal .btn-primary');
+  btn.disabled=true;
+  btn.textContent='Marking settled\u2026';
+  DB.set('expenses',S.expenses).then(()=>{
+    closeModal('settlement-modal');
+    renderView();
+    flash('\u2713 All expenses settled!','ok');
+  }).catch(e=>{
+    console.error('Settlement error:',e);
+    flash('Failed to save settlement','er');
+    S.expenses.forEach(e=>{delete e.settled;});
+  }).finally(()=>{
+    btn.disabled=false;
+    btn.textContent='Mark Settled';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    ['todo-modal','shop-modal','goal-modal','event-modal','note-modal','mem-modal','ln-modal','bucket-modal','exp-modal','idea-modal'].forEach(id=>closeModal(id));
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════
+async function init(){
+  applyTheme(localStorage.getItem('us-theme')||'dark');
+  try{
+    const profile=await DB.get('profile');
+    if(!profile){document.getElementById('setup').classList.add('active');return;}
+    S.profile=profile;
+    applyColors(profile);
+
+    // Load all data in parallel
+    const [th,thh,shop,gh,ghr,ev,notes,mem,ln,bkt,exp,ideas,debts,bills]=await Promise.all([
+      DB.get('todos_his'),DB.get('todos_her'),
+      DB.get('shopping'),
+      DB.get('goals_his'),DB.get('goals_her'),
+      DB.get('events'),DB.get('notes'),DB.get('memories'),
+      DB.get('love_notes'),DB.get('bucket'),
+      DB.get('expenses'),DB.get('date_ideas'),
+      DB.get('debts'),DB.get('bills')
+    ]);
+    S.todos_his=Array.isArray(th)?th:[];
+    S.todos_her=Array.isArray(thh)?thh:[];
+    S.shopping=Array.isArray(shop)?shop:[];
+    S.goals_his=Array.isArray(gh)?gh:[];
+    S.goals_her=Array.isArray(ghr)?ghr:[];
+    S.events=Array.isArray(ev)?ev:[];
+    S.notes=Array.isArray(notes)?notes:[];
+    S.memories=Array.isArray(mem)?mem:[];
+    S.love_notes=Array.isArray(ln)?ln:[];
+    S.bucket=Array.isArray(bkt)?bkt:[];
+    S.expenses=Array.isArray(exp)?exp:[];
+    S.date_ideas=Array.isArray(ideas)?ideas:[];
+    S.debts=Array.isArray(debts)?debts:[];
+    S.bills=Array.isArray(bills)?bills:[];
+
+    // Load recent moods
+    const moodRows=await DB.getAll('mood_');
+    moodRows.forEach(row=>{S.moods[row.id.replace('mood_','')]=row.data;});
+
+    startApp();
+  }catch(e){
+    console.error(e);
+    document.getElementById('setup').classList.add('active');
+    const err=document.getElementById('setup-err');
+    err.textContent='Could not connect. Make sure couple_data table is created in Supabase and you have internet.';
+    err.style.display='block';
+  }
+}
+
+// Check PIN auth on page load, then init app if auth passes
+document.addEventListener('DOMContentLoaded',function(){
+  // Add Enter key to PIN input
+  document.getElementById('pin-input').addEventListener('keypress',function(e){
+    if(e.key==='Enter')submitPIN();
+  });
+  
+  // Check authentication before loading app
+  if(!checkPINAuth()){
+    // PIN modal shown, app will init after successful PIN entry
+    return;
+  }
+  // If already authenticated in this session, load app immediately
+  init();
+});
+</script>
+</body>
+</html>
