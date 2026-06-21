@@ -253,7 +253,7 @@ Suggested cadence:
 
 - Weekly: quick status and security sanity check
 - Monthly: dependency and deployment review
-- Quarterly: doc and architecture cleanup
+- Quarterly: documentation and architecture review
 
 ## 19. Commands Reference
 
@@ -409,7 +409,7 @@ Rollback checklist:
 
 ## 33. Contribution Boundaries
 
-- keep non-requested cleanup out of feature commits
+- keep non-requested maintenance edits out of feature commits
 - preserve user edits unless instructed otherwise
 - report unexpected file changes immediately
 

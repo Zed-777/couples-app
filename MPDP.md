@@ -552,7 +552,7 @@ WRONG?  → Show error → Clear input → Allow retry
 - ✅ Set up Cloudflare Pages environment variables for secure key injection
 - ✅ Created `functions/api/env.js` for dynamic environment variable serving
 - ✅ Enabled Supabase Data API access
-- ✅ Rewrote Git history to remove exposed keys
+- ✅ Rewrote Git history to remove historical credential references
 - ✅ Verified zero key-bearing commits in reachable history
 
 **Time Spent**: ~4 hours (including security investigation & Cloudflare setup)  

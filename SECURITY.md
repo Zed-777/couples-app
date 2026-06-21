@@ -253,7 +253,7 @@ Repository owner is responsible for:
 
 ### D.1 Immediate Response Timeline
 
-- Within 15 minutes: disable exposed key and rotate.
+- Within 15 minutes: rotate the affected key.
 - Within 30 minutes: update deployment secrets.
 - Within 60 minutes: validate live app with new credentials.
 - Within 24 hours: complete post-incident report.
@@ -262,7 +262,7 @@ Repository owner is responsible for:
 
 - [ ] Incident root cause identified.
 - [ ] Key rotation confirmed.
-- [ ] History cleanup assessed.
+- [ ] History remediation assessed.
 - [ ] Prevention tasks added to roadmap.
 
 ## Appendix E: Security Command Reference
