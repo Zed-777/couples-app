@@ -62,3 +62,6 @@ config.js
 config.local.js
 config.*.js
 !config.example.js
+
+# Local planning prompts
+REPO_AUDIT_PROMPT.md
