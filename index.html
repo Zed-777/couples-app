@@ -752,7 +752,7 @@ create policy "allow all" on couple_data
 const SB_URL=window.__ENV?.SUPABASE_URL||window.SUPABASE_URL||'';
 const SB_KEY=window.__ENV?.SUPABASE_KEY||window.SUPABASE_KEY||'';
 if(!SB_URL||!SB_KEY){
-  throw new Error('Missing Supabase config. Provide window.__ENV via config.js (local) or deployment env injection.');
+  throw new Error('Missing Supabase config. Provide window.__ENV via local config or deployment environment injection.');
 }
 const CTABLE=SB_URL+'/rest/v1/couple_data';
 const CH={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
@@ -1900,14 +1900,6 @@ async function deleteBucket(id){
 // MONEY SUB
 function renderMoney(){
   const p=S.profile;
-  const debtTotals=S.debts.reduce((totals,d)=>{
-    const total=pv(d.amount);
-    const paid=Math.min(total,pv(d.amount_paid||0));
-    totals.total+=total;
-    totals.paid+=paid;
-    totals.remaining+=Math.max(0,total-paid);
-    return totals;
-  },{total:0,paid:0,remaining:0});
   let hisOwes=0,herOwes=0;
   S.expenses.forEach(e=>{
     if(e.settled)return;
@@ -1923,12 +1915,6 @@ function renderMoney(){
   });
   const net=herOwes-hisOwes;
   let html=``;
-
-  // Debt summary from all loans/payments
-  html+=`<div class="balance-card" style="background:${debtTotals.remaining===0?'var(--s2)':'rgba(245,158,11,.08)'};border:1px solid ${debtTotals.remaining===0?'var(--b2)':'rgba(245,158,11,.35)'}">
-    <div class="balance-num" style="color:${debtTotals.remaining===0?'var(--t1)':'var(--gold)'}">${fm(debtTotals.paid)} of ${fm(debtTotals.total)} paid</div>
-    <div class="balance-label">${debtTotals.remaining===0?'All debts paid':fm(debtTotals.remaining)+' remaining across loans'}</div>
-  </div>`;
   
   // Balance from expenses
   html+=`<div class="balance-card" style="background:${net===0?'var(--s2)':net>0?'var(--his-bg)':'var(--her-bg)'};border:1px solid ${net===0?'var(--b2)':net>0?'rgba(99,102,241,.3)':'rgba(225,29,72,.3)'}">
@@ -1954,9 +1940,8 @@ function renderMoney(){
       html+=`<div style="font-size:12px;color:var(--his);font-weight:700;margin-top:12px;margin-bottom:8px">Owed by ${p.hisName}</div>`;
       debtsByHim.forEach(d=>{
         const amountPaid=pv(d.amount_paid||0);
-        const totalAmount=pv(d.amount);
-        const remaining=Math.max(0,totalAmount-amountPaid);
-        const pct=Math.min(100,Math.round((amountPaid/totalAmount)*100));
+        const remaining=pv(d.amount)-amountPaid;
+        const pct=Math.round((amountPaid/pv(d.amount))*100);
         html+=`<div style="background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:12px;margin-bottom:10px">
           <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
             <div>
@@ -1969,7 +1954,7 @@ function renderMoney(){
             <div style="background:var(--his);height:100%;width:${pct}%"></div>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
-            <span style="color:var(--t3)">${fm(amountPaid)} of ${fm(totalAmount)} paid - ${fm(remaining)} remaining</span>
+            <span style="color:var(--t3)">${fm(amountPaid)} of ${fm(pv(d.amount))} paid</span>
             <button onclick="openPaymentModal('${d.id}')" style="background:var(--his);color:white;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Update</button>
           </div>
         </div>`;
@@ -1981,9 +1966,8 @@ function renderMoney(){
       html+=`<div style="font-size:12px;color:var(--her);font-weight:700;margin-top:12px;margin-bottom:8px">Owed by ${p.herName}</div>`;
       debtsByHer.forEach(d=>{
         const amountPaid=pv(d.amount_paid||0);
-        const totalAmount=pv(d.amount);
-        const remaining=Math.max(0,totalAmount-amountPaid);
-        const pct=Math.min(100,Math.round((amountPaid/totalAmount)*100));
+        const remaining=pv(d.amount)-amountPaid;
+        const pct=Math.round((amountPaid/pv(d.amount))*100);
         html+=`<div style="background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:12px;margin-bottom:10px">
           <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
             <div>
@@ -1996,7 +1980,7 @@ function renderMoney(){
             <div style="background:var(--her);height:100%;width:${pct}%"></div>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
-            <span style="color:var(--t3)">${fm(amountPaid)} of ${fm(totalAmount)} paid - ${fm(remaining)} remaining</span>
+            <span style="color:var(--t3)">${fm(amountPaid)} of ${fm(pv(d.amount))} paid</span>
             <button onclick="openPaymentModal('${d.id}')" style="background:var(--her);color:white;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Update</button>
           </div>
         </div>`;
@@ -2008,9 +1992,8 @@ function renderMoney(){
       html+=`<div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:12px;margin-bottom:8px">Owed by Both</div>`;
       debtsByBoth.forEach(d=>{
         const amountPaid=pv(d.amount_paid||0);
-        const totalAmount=pv(d.amount);
-        const remaining=Math.max(0,totalAmount-amountPaid);
-        const pct=Math.min(100,Math.round((amountPaid/totalAmount)*100));
+        const remaining=pv(d.amount)-amountPaid;
+        const pct=Math.round((amountPaid/pv(d.amount))*100);
         html+=`<div style="background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:12px;margin-bottom:10px">
           <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
             <div>
@@ -2023,7 +2006,7 @@ function renderMoney(){
             <div style="background:var(--gold);height:100%;width:${pct}%"></div>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
-            <span style="color:var(--t3)">${fm(amountPaid)} of ${fm(totalAmount)} paid - ${fm(remaining)} remaining</span>
+            <span style="color:var(--t3)">${fm(amountPaid)} of ${fm(pv(d.amount))} paid</span>
             <button onclick="openPaymentModal('${d.id}')" style="background:var(--gold);color:#000;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Update</button>
           </div>
         </div>`;

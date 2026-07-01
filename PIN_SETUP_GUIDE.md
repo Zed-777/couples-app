@@ -20,7 +20,7 @@ The Couples App now uses **PIN-based authentication** with environment-injected 
 
 ```javascript
 window.__ENV = {
-  SUPABASE_URL: 'https://nkanizeemmcywnekchhr.supabase.co',
+    SUPABASE_URL: '[YOUR_SUPABASE_URL]',
   SUPABASE_KEY: '[YOUR_ANON_KEY]',
   COUPLES_APP_PIN: '123456'  // ← Change to your PIN
 };
@@ -40,8 +40,8 @@ window.__ENV = {
 #### Steps:
 
 1. **Go to Cloudflare Pages Dashboard**
-   - URL: https://dash.cloudflare.com
-   - Select your project: **couples-app-em6**
+    - Open your Cloudflare account dashboard
+    - Select your Pages project
 
 2. **Navigate to Settings → Environment variables**
    - Click "Add environment variable"
@@ -154,7 +154,7 @@ This PIN auth system is **designed for reuse** across multiple apps sharing Supa
 - [ ] Local: Refresh page → PIN required again
 - [ ] Local: Open app → close tab → reopen → PIN required
 - [ ] Deployed: Cloudflare env variable set
-- [ ] Deployed: PIN modal appears on https://couples-app-em6.pages.dev/
+- [ ] Deployed: PIN modal appears on your deployed Pages domain
 - [ ] Deployed: Correct PIN from config.js unlocks app
 - [ ] Deployed: Close/reopen tab → PIN required again
 
