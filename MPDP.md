@@ -3,7 +3,7 @@
 **Couples App - Complete Audit & Development Roadmap**  
 *Last Updated: 2026-04-25*  
 *Current Phase: 3+ (Features & Settings)*  
-*Repository: [Zed-777/couples-app](https://github.com/Zed-777/couples-app)*
+*Repository: couples-app (private deployment references removed)*
 
 ---
 
@@ -12,7 +12,7 @@
 | Metric | Status | Notes |
 |--------|--------|-------|
 | **Current Version** | v1.1 (Live) | Single-file app, fully deployed on Cloudflare Pages |
-| **Live URL** | ✅ <https://couples-app-em6.pages.dev/> | HTTP 200, responsive mobile design |
+| **Live URL** | Private | Deployment URL intentionally omitted |
 | **Authentication** | ✅ PIN-based | Shared 4-6 digit PIN, session-based, env-injected |
 | **Settings** | ✅ User Settings | Edit names, anniversary, colors from More > Settings |
 | **Codebase Size** | ~1,550 lines (105+ KB) | All HTML/CSS/JS in single index.html |
@@ -374,12 +374,12 @@ WRONG?  → Show error → Clear input → Allow retry
 - `PIN_SETUP_GUIDE.md`: Comprehensive setup and troubleshooting guide
 
 **Deployment Instructions**:
-1. In Cloudflare Pages dashboard for couples-app-em6
+1. In your Cloudflare Pages dashboard
 2. Go to Settings → Environment variables
 3. Add: Name=`COUPLES_APP_PIN`, Value=`[your-pin]`
 4. Select Production environment
 5. Redeploy (or wait for next git push)
-6. Visit https://couples-app-em6.pages.dev/ and test PIN
+6. Visit your deployed Pages domain and test PIN
 
 **For Other Apps** (Multi-App Pattern):
 - Use site-specific PIN variable: `FAMILY_PLANNER_PIN`, `BUDGET_APP_PIN`, etc.
@@ -557,7 +557,7 @@ WRONG?  → Show error → Clear input → Allow retry
 
 **Time Spent**: ~4 hours (including security investigation & Cloudflare setup)  
 **Risk Level**: ✅ LOW (all critical issues resolved)  
-**Deployment Status**: ✅ LIVE on https://couples-app-em6.pages.dev/
+**Deployment Status**: ✅ LIVE (URL intentionally omitted)
 
 ---
 
@@ -701,7 +701,7 @@ WRONG?  → Show error → Clear input → Allow retry
 
 - [ ] Merge to main branch
 - [ ] Verify Cloudflare Pages auto-deploy
-- [ ] Test live site at <https://couples-app-em6.pages.dev/>
+- [ ] Test live site on deployed domain
 - [ ] Confirm HTTP 200 status
 
 ### Post-Deployment

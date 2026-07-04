@@ -6,7 +6,7 @@
  * Never commit config.js.
  */
 window.__ENV = {
-  SUPABASE_URL: 'https://YOUR_PROJECT.supabase.co',
+  SUPABASE_URL: 'YOUR_SUPABASE_URL',
   SUPABASE_KEY: 'YOUR_SUPABASE_ANON_KEY',
   COUPLES_APP_PIN: '123456'
 };
