@@ -6,7 +6,23 @@ Thank you for using Couples App! If the project has been valuable to you, here a
 
 ---
 
-## 💚 Support Options
+## � Cryptocurrency Donations
+
+The most direct way to support the project. Donations are appreciated and help sustain development.
+
+### Wallet Addresses
+
+| Cryptocurrency | Address | Network |
+|---|---|---|
+| **Bitcoin** | `bc1qezg26hp8n7339x8fa0084wrf4ct8xuytqkydt9` | Bitcoin (SegWit) |
+| **Ethereum** | `0x641F7431aC0aC4Ba411016161816b1AA3D886b60` | Ethereum Mainnet |
+| **USDT** | `0x641F7431aC0aC4Ba411016161816b1AA3D886b60` | Ethereum/Polygon |
+
+**Note:** For USDT, you can send on either Ethereum mainnet or Polygon to the Ethereum address shown above—please choose the correct network when transferring.
+
+---
+
+## �💚 Support Options
 
 Support the project by:
 
