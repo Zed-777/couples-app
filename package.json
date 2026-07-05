@@ -2,7 +2,7 @@
   "name": "couples-app",
   "version": "1.2.0",
   "private": true,
-  "description": "Stable static couples planning SPA with Supabase backend and runtime environment injection.",
+  "description": "MVP static couples planning SPA under active development with Supabase backend and runtime environment injection.",
   "license": "MIT",
   "scripts": {
     "check": "echo \"No build step. Open index.html or deploy static root.\""

@@ -4,7 +4,8 @@
 
 The Couples App now uses **PIN-based authentication** with environment-injected secrets. This replaces individual user accounts with a **shared 4-6 digit PIN** that works on any device.
 
-**Architecture**: 
+**Architecture**:
+
 - PIN entered once per session
 - Stored in `sessionStorage` (auto-clears on tab close)
 - Never hardcoded; injected via Cloudflare Pages environment variables
@@ -20,15 +21,16 @@ The Couples App now uses **PIN-based authentication** with environment-injected 
 
 ```javascript
 window.__ENV = {
-    SUPABASE_URL: '[YOUR_SUPABASE_URL]',
+  SUPABASE_URL: '[YOUR_SUPABASE_URL]',
   SUPABASE_KEY: '[YOUR_ANON_KEY]',
-  COUPLES_APP_PIN: '123456'  // ← Change to your PIN
+  COUPLES_APP_PIN: '[YOUR_COUPLES_APP_PIN]'  // ← Change to your PIN
 };
 ```
 
 **To test locally:**
+
 1. Open `index.html` in browser
-2. Enter PIN (default: `123456`)
+2. Enter the PIN you configured in `config.js`
 3. App loads and stays unlocked until tab closes
 
 ---
@@ -37,20 +39,17 @@ window.__ENV = {
 
 **Required**: Add `COUPLES_APP_PIN` to Cloudflare environment variables
 
-#### Steps:
+#### Steps
 
 1. **Go to Cloudflare Pages Dashboard**
     - Open your Cloudflare account dashboard
     - Select your Pages project
-
 2. **Navigate to Settings → Environment variables**
    - Click "Add environment variable"
-
 3. **Add the PIN environment variable:**
    - **Name**: `COUPLES_APP_PIN`
-   - **Value**: Your desired PIN (e.g., `789012`)
+   - **Value**: Your desired PIN (for example, a 4-6 digit numeric code)
    - **Environments**: Select `Production` (and `Preview` if you want PIN on preview builds)
-
 4. **Redeploy** (or wait for next push to main branch)
    - The function `functions/api/env.js` will now inject your PIN
 
@@ -60,12 +59,12 @@ window.__ENV = {
 
 ### User Flow
 
-```
+```text
 User visits site
     ↓
 sessionStorage checked for COUPLES_APP_AUTH
     ↓
-NOT AUTHENTICATED? 
+NOT AUTHENTICATED?
     ↓
 PIN Modal appears (blocking overlay)
     ↓
@@ -83,7 +82,7 @@ App fully accessible until tab closes
 ### Session Management
 
 | Scenario | Behavior |
-|----------|----------|
+| --- | --- |
 | **New tab opened** | PIN required (fresh sessionStorage) |
 | **Tab refreshed** | PIN required (sessionStorage cleared by refresh) |
 | **Tab stays open** | No PIN required (sessionStorage persists) |
@@ -96,32 +95,36 @@ App fully accessible until tab closes
 
 This PIN auth system is **designed for reuse** across multiple apps sharing Supabase:
 
-### For a second app (e.g., Family Planner):
+### For a second app (e.g., Family Planner)
 
 1. **Create new environment variable on Cloudflare:**
+
    - Name: `FAMILY_PLANNER_PIN`
    - Value: Different PIN (e.g., `654321`)
 
-2. **Update app code:**
-   ```javascript
-   // In config.js for Family Planner
-   window.__ENV = {
-    SUPABASE_URL: '[SHARED_SUPABASE_URL]',
-    SUPABASE_KEY: '[SHARED_ANON_KEY]',
-    FAMILY_PLANNER_PIN: '[APP_PIN]'  // ← Site-specific naming
-   };
-   ```
+1. **Update app code:**
 
-3. **Update PIN functions:**
-   ```javascript
-   const PIN_ENV_VAR = 'FAMILY_PLANNER_PIN';  // ← Just change this
-   function checkPIN() {
-     const correctPIN = window.__ENV?.[PIN_ENV_VAR] || '';
-     // ... rest same
-   }
-   ```
+```javascript
+// In config.js for Family Planner
+window.__ENV = {
+  SUPABASE_URL: '[SHARED_SUPABASE_URL]',
+  SUPABASE_KEY: '[SHARED_ANON_KEY]',
+  FAMILY_PLANNER_PIN: '[APP_PIN]'  // ← Site-specific naming
+};
+```
+
+1. **Update PIN functions:**
+
+```javascript
+const PIN_ENV_VAR = 'FAMILY_PLANNER_PIN';  // ← Just change this
+function checkPIN() {
+  const correctPIN = window.__ENV?.[PIN_ENV_VAR] || '';
+  // ... rest same
+}
+```
 
 **Benefits:**
+
 - Each app has its own PIN
 - Users don't need per-app authentication (PIN is universal)
 - Shared Supabase tables stay organized by app
@@ -132,6 +135,7 @@ This PIN auth system is **designed for reuse** across multiple apps sharing Supa
 ## Security Notes
 
 ✅ **Strong Points:**
+
 - PIN not in Git (secure)
 - PIN not visible in browser code (environment-injected)
 - Session-only (auto-clears)
@@ -139,6 +143,7 @@ This PIN auth system is **designed for reuse** across multiple apps sharing Supa
 - Simple attack surface
 
 ⚠️ **Limitations:**
+
 - No per-user audit trail (shared PIN can't track who accessed)
 - Not GDPR-suitable for multi-user apps
 - PIN visible in browser console (acceptable for shared couples app)
@@ -163,24 +168,33 @@ This PIN auth system is **designed for reuse** across multiple apps sharing Supa
 ## Troubleshooting
 
 ### "PIN not configured. Contact admin."
-**Problem**: `COUPLES_APP_PIN` not in Cloudflare environment variables  
-**Solution**: 
+
+**Problem**: `COUPLES_APP_PIN` not in Cloudflare environment variables
+**Solution**:
+
 1. Check Cloudflare Pages dashboard → Settings → Environment variables
+
 2. Confirm `COUPLES_APP_PIN` is added and saved
 3. Redeploy or wait ~1 minute for variable to propagate
 
 ### PIN modal stuck after entering PIN
-**Problem**: App not loading after correct PIN  
+
+**Problem**: App not loading after correct PIN
 **Solution**:
+
 1. Open browser console (F12)
+
 2. Check for errors in `init()` function
 3. Likely cause: Supabase connection failed
 4. Verify `SUPABASE_URL` and `SUPABASE_KEY` are set
 
 ### PIN works locally but not deployed
-**Problem**: `config.js` not being loaded in production  
+
+**Problem**: `config.js` not being loaded in production
 **Solution**:
+
 1. `config.js` is only for local dev (in `.gitignore`)
+
 2. Production MUST use Cloudflare environment variables
 3. Check that `functions/api/env.js` is deployed and returns PIN
 
@@ -193,4 +207,3 @@ This PIN auth system is **designed for reuse** across multiple apps sharing Supa
 - 🔔 Notifications: Optional reminder to log out after inactivity
 - 📱 Biometric: Allow Face/Touch ID unlock on supported devices
 - 🔐 Master PIN: Admin PIN for different access level
-
