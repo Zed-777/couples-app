@@ -31,7 +31,7 @@ Core tracked files:
 - `functions/api/env.js`
 - `README.md`
 - `MPDP.md`
-- `PIN_SETUP_GUIDE.md`
+- `_headers`
 - `SECURITY.md`
 - `PROJECT_GUIDELINES.md`
 - `AGENT_PRACTICE_STANDARDS.md`
@@ -332,7 +332,7 @@ Current repository intentionally does not include:
 ### 26.1 Manual Happy Path
 
 - new profile setup
-- PIN unlock flow
+- demo notice shows and can be dismissed
 - add and delete item per major feature
 
 ### 26.2 Manual Edge Cases
