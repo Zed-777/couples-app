@@ -1,25 +1,28 @@
+/**
+ * Cloudflare Pages Function: GET /api/env
+ *
+ * Serves the public runtime config as `window.__ENV`.
+ *
+ * Only values that are safe for every visitor to see belong here. The Supabase
+ * anon key is public by design: whatever it is allowed to do, anyone can do.
+ * Never add the service_role key, a password or a PIN to this response.
+ */
 export async function onRequest(context) {
   const { env } = context;
-  const esc = (value) => String(value || '')
-    .replace(/\\/g, '\\\\')
-    .replace(/'/g, "\\'")
-    .replace(/\r/g, '')
-    .replace(/\n/g, '');
 
-  const supabaseUrl = esc(env.SUPABASE_URL);
-  const supabaseKey = esc(env.SUPABASE_KEY);
-  const couplesPin = esc(env.COUPLES_APP_PIN);
+  // JSON.stringify produces a correctly escaped JavaScript string literal.
+  const config = {
+    SUPABASE_URL: String(env.SUPABASE_URL || ''),
+    SUPABASE_KEY: String(env.SUPABASE_KEY || '')
+  };
 
-  const script = `window.__ENV = {
-  SUPABASE_URL: '${supabaseUrl}',
-  SUPABASE_KEY: '${supabaseKey}',
-  COUPLES_APP_PIN: '${couplesPin}'
-};`;
+  const script = `window.__ENV = ${JSON.stringify(config)};`;
 
   return new Response(script, {
     headers: {
       'Content-Type': 'application/javascript; charset=utf-8',
-      'Cache-Control': 'max-age=300'
+      'Cache-Control': 'max-age=300',
+      'X-Content-Type-Options': 'nosniff'
     }
   });
 }

@@ -13,13 +13,13 @@ Repository: couples-app (private deployment references removed)
 | --- | --- | --- |
 | **Current Version** | v1.1 (Live) | Single-file app, fully deployed on Cloudflare Pages |
 | **Live URL** | Private | Deployment URL intentionally omitted |
-| **Authentication** | ✅ PIN-based | Shared 4-6 digit PIN, session-based, env-injected |
+| **Authentication** | ⚠️ None (demo) | PIN gate removed 2026-11-07: the PIN was served to every visitor via `/api/env`. Next: Supabase Auth + RLS |
 | **Settings** | ✅ User Settings | Edit names, anniversary, colors from More > Settings |
 | **Codebase Size** | ~1,550 lines (105+ KB) | All HTML/CSS/JS in single index.html |
 | **Features Implemented** | 10/10 ✅ | Todos, Shopping, Goals, Calendar, Notes, Memories, Love Notes, Mood, Bucket, Expenses, Date Jar + Settings |
-| **Database** | Supabase REST API | couple_data table with RLS enabled |
+| **Database** | Supabase REST API | couple_data table; the anon role can read and write it, so treat all data as public |
 | **Deployment** | GitHub → Cloudflare Pages | Auto-deploy on main branch push |
-| **Repository Status** | Cleaned ✅ | 5 files (index.html, README.md, .gitignore, PIN_SETUP_GUIDE.md, MPDP.md) |
+| **Repository Status** | Cleaned ✅ | Single-file app plus docs, `_headers` and the `/api/env` function |
 
 ---
 
@@ -321,7 +321,17 @@ async function saveTodo(){
 
 ---
 
-## � PIN-BASED AUTHENTICATION ✅ IMPLEMENTED
+## 🔒 SECURITY HARDENING (2026-11-07)
+
+- Removed the client-side PIN gate. `/api/env` sent the PIN to every visitor, and the check could be skipped by setting a sessionStorage flag, so it gave no real protection.
+- `esc()` now escapes quotes; partner names, event times/types, goal types, bill repeat labels, memory emojis and the anniversary value are escaped; record ids are sanitised (`sid()`) before use in inline handlers; goal numbers are coerced (`num()`).
+- `/api/env` now serialises values with `JSON.stringify` and only returns the Supabase URL and anon key.
+- Added a demo notice and a `_headers` file (CSP, frame, referrer and permissions policies).
+- Next milestone: Supabase Auth with per-couple row-level security.
+
+---
+
+## 📜 PIN-BASED AUTHENTICATION (REMOVED 2026-11-07, kept for history)
 
 **Feature**: Shared PIN-based access instead of individual user accounts
 

@@ -6,12 +6,11 @@ It is designed for deployment on static hosts (for example Cloudflare Pages) wit
 
 ## Status
 
-- MVP release, actively in development.
-- Suitable for early testing and feedback; not yet intended for critical production use.
+- **Demo / learning project.** MVP, actively in development.
+- There is no login: every visitor uses the same public Supabase anon key, so anyone with the link can read and change the data. Do not store real personal information in it.
+- Moving to real accounts (Supabase Auth with per-couple row-level security) is the next security milestone. See [SECURITY.md](SECURITY.md).
 
 ## Features
-
-- Shared PIN gate for session access
 
 - Todo management (his/her)
 
@@ -47,8 +46,6 @@ It is designed for deployment on static hosts (for example Cloudflare Pages) wit
 
 - [MPDP.md](MPDP.md): project roadmap and progress tracking
 
-- [PIN_SETUP_GUIDE.md](PIN_SETUP_GUIDE.md): PIN setup and deployment instructions
-
 - [config.example.js](config.example.js): local config template (safe placeholders)
 
 - [.gitignore](.gitignore): ignore rules for secrets and local artifacts
@@ -61,9 +58,7 @@ It is designed for deployment on static hosts (for example Cloudflare Pages) wit
 
    - `SUPABASE_URL`
 
-   - `SUPABASE_KEY`
-
-   - `COUPLES_APP_PIN`
+   - `SUPABASE_KEY` (the anon key, never the service_role key)
 
 3. Serve the repo root with any static server, or open [index.html](index.html) directly if your browser setup allows local script loading.
 
@@ -72,8 +67,7 @@ Example local config shape:
 ```javascript
 window.__ENV = {
   SUPABASE_URL: 'YOUR_SUPABASE_URL',
-  SUPABASE_KEY: 'YOUR_SUPABASE_ANON_KEY',
-  COUPLES_APP_PIN: 'YOUR_COUPLES_APP_PIN'
+  SUPABASE_KEY: 'YOUR_SUPABASE_ANON_KEY'
 };
 ```
 
@@ -89,14 +83,16 @@ Cloudflare Pages setup:
 
    - `SUPABASE_KEY`
 
-   - `COUPLES_APP_PIN`
-
 3. Confirm the function endpoint [functions/api/env.js](functions/api/env.js) is active at `/api/env`.
 
 4. Verify the app initializes correctly with runtime config.
 
 ## Security Notes
 
+- The anon key and project URL reach every visitor's browser by design. They are not secrets; access control has to come from Supabase Auth and RLS.
+- Never put the service_role key, passwords or PINs in `/api/env` or in client code.
+- User content is HTML-escaped before rendering, and record ids are sanitised before use in inline handlers.
+- [_headers](_headers) sets a Content-Security-Policy and other security headers on Cloudflare Pages and Netlify.
 - Do not commit `config.js`.
 
 - Keep all credentials in local ignored files or deployment secrets.

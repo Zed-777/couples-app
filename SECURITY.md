@@ -29,19 +29,24 @@ Data includes:
 - Memories and love notes
 - Expense, debt, and bill tracking data
 
-Access is currently controlled by:
+**Current access model (demo): there is no access control.**
 
-- Supabase anon key for API access
-- PIN gate in UI for shared app access
-- Session storage marker for unlocked state
+- Every visitor's browser receives the Supabase project URL and anon key from `/api/env`. These are public by design.
+- The app reads and writes `couple_data` with that anon key, so the anon role must be allowed to read and write the table. Anyone who has the key can do the same from outside the app.
+- Treat everything in `couple_data` as public. Do not store real personal information while this model is in place.
+
+The previous PIN gate was removed on 2026-11-07. `/api/env` sent the PIN to every visitor and the unlock flag lived in `sessionStorage`, so it could be bypassed and gave no real protection.
+
+**Target model:** Supabase Auth (email sign-in) with row-level security policies that only allow a couple's own signed-in members to read or write their rows (for example a `couple_id` column checked against `auth.uid()` membership). The anon role then gets no direct table access.
 
 ## Credentials
 
 Credentials required at runtime:
 
-- `SUPABASE_URL`
-- `SUPABASE_KEY`
-- `COUPLES_APP_PIN`
+- `SUPABASE_URL` (public)
+- `SUPABASE_KEY`: the anon key only (public). Never the service_role key.
+
+`/api/env` must only ever return values that are safe for every visitor to see.
 
 Credentials must not be hardcoded in tracked files.
 
@@ -75,7 +80,7 @@ Production runtime config is injected from `functions/api/env.js`.
 
 `/api/env` returns a script that initializes `window.__ENV`.
 
-Environment values are escaped before output.
+Values are serialised with `JSON.stringify`, so they are always valid, escaped JavaScript string literals.
 
 Recommended headers:
 
@@ -146,8 +151,8 @@ Post-deploy checks:
 
 ## Storage and Retention Notes
 
-- Session auth marker uses `sessionStorage`
-- No password is persisted in repository files
+- `sessionStorage` only remembers whether the demo notice was dismissed
+- No password or PIN is used or persisted
 - Data persistence happens in Supabase only
 
 ## Security Boundaries
@@ -156,7 +161,7 @@ Current model is suitable for personal/shared planning use.
 
 This repository does not implement enterprise identity or RBAC.
 
-PIN-based app gating should not be treated as high-assurance authentication.
+The current build has no authentication and is a demo only.
 
 ## Future Security Improvements
 
@@ -164,7 +169,7 @@ PIN-based app gating should not be treated as high-assurance authentication.
 - Add stricter request authorization if backend expands
 - Add automated pre-commit secret scanning
 - Add CI checks for key-pattern regressions
-- Add content security policy review for deployment
+- Review the Content-Security-Policy in `_headers` whenever a new external origin is added
 
 ## Contact and Ownership
 
@@ -178,6 +183,7 @@ Repository owner is responsible for:
 ## Revision History
 
 - 2026-06-21: Initial formal policy added
+- 2026-11-07: Documented the real (open) access model, removed the PIN gate, hardened output encoding, added `_headers`
 
 ## Appendix A: Operational Controls
 
@@ -240,7 +246,9 @@ Repository owner is responsible for:
 
 ### C.2 Input and Output Safety
 
-- Keep user content escaped when rendered in HTML contexts.
+- Keep user content escaped when rendered in HTML contexts (`esc()` escapes `& < > " '`).
+- Sanitise record ids with `sid()` before placing them in inline event handlers. HTML-escaping does not protect a JavaScript string inside an attribute.
+- Coerce numbers read from storage with `num()` before rendering or sizing arrays.
 - Validate and clamp numeric values for financial fields.
 - Reject invalid date and amount states before persistence.
 
